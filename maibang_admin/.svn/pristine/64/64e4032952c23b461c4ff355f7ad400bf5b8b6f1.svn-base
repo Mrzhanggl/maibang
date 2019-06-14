@@ -1,0 +1,166 @@
+<template>
+    <!-- 店铺装修 -->
+      <el-container id="shopInstallSwitch2">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb> 
+        <el-breadcrumb-item :to="{path:'home'}">     
+          模板商城
+        </el-breadcrumb-item>
+        <el-breadcrumb-item>
+          模板预览
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row class="mainBody bgFFF" type="flex" justify="center">
+        <el-row  class="mainCenter">
+        
+      <div>
+        <img src="../../assets/shop/install/install_01.png" alt="">
+      </div>
+      <div class="templateMain">
+        
+        <div><img src="../../assets/shop/install/install_02.gif" alt=""></div>
+        
+        <div class="sowing">
+          <div class="broadcast">
+            <el-carousel 
+            v-if="template"
+            :interval="4000" type="card" height="108px">
+            <el-carousel-item v-for="item in template" :key="item.picture_relative">
+              <img :src="item.picture" alt="">
+            </el-carousel-item>
+          </el-carousel>
+          
+          <img 
+          v-else
+          src="../../assets/shop/install/install_04.png" alt="">
+          </div>
+    
+          <router-link to="addinfo2">
+          <div class="Mask">
+            <img src="../../assets/shop/install/install_03.png" alt="">
+          </div>
+          </router-link>
+        </div>
+        <div>
+          <img src="../../assets/shop/install/install_05.png" alt="">
+        </div>
+      </div>
+      <div class="dialog-footer textCen">
+        <el-button type="primary" @click="templateOpen">启用该模板</el-button>
+      </div>
+      </el-row>
+      </el-row>
+    </el-main>
+            
+  </el-container>
+
+</template>
+<script>
+import { detail, useTemplate } from "api/shop/install";
+
+export default {
+  data() {
+    return {
+      template: [],
+      msg: this.$store.state.shopinstall.change
+    };
+  },
+  mounted() {
+    this.loadDetail();
+  },
+  computed: {
+    listenshowpage() {
+      return this.$store.state.shopinstall.change;
+    }
+  },
+
+  watch: {
+    listenshowpage() {
+      this.loadDetail();
+    }
+  },
+  methods: {
+    loadDetail() {
+      detail(2).then(result => {
+        if (result.data.code == 200) {
+          if (result.data.data.template[0]) {
+            this.template = result.data.data.template;
+          }
+        } else {
+          this.$message.error(result.data.data.error);
+        }
+      });
+    },
+    templateOpen() {
+      useTemplate(2).then(result => {
+        console.log(result);
+        this.$message.success("模板提交审核成功");
+        this.$router.push({ path: "home" });
+      });
+    }
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+#shopInstallSwitch2
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px
+    .mainBody
+      width 100%
+      padding 30px 10px 100px 10px
+      min-height 750px
+      .mainCenter
+        min-width 400px
+        width 30%
+        img
+          width 100%
+          height auto
+        .templateMain
+          width 420px
+          padding 10px 30px
+          background-color #eaf3fb
+          .sowing
+            position relative
+            .broadcast
+              width 100%
+              height 200px
+              display flex
+              align-items center
+              .el-carousel
+                width 100%
+            .Mask
+              position absolute
+              top 0
+              width 100%
+              cursor pointer
+              z-index 3
+        .dialog-footer
+          margin-top 30px
+      .customPublic
+        .customPublicMain
+          padding 50px
+</style>
+<style>
+#shopInstallSwitch2 .broadcast li {
+  width: 20px;
+  height: 8px;
+}
+#shopInstallSwitch2 .broadcast li button {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 1;
+}
+#shopInstallSwitch2 .broadcast .el-carousel__indicator.is-active button {
+  background-color: #1491f2;
+}
+</style>

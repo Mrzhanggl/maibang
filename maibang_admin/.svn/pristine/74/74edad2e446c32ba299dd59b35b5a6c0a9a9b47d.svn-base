@@ -1,0 +1,147 @@
+
+<template>
+  <!-- 店铺装修 -->
+  <el-container id="shopInstallHome">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb> 
+        <el-breadcrumb-item>
+          模板商城
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row type="flex" justify="space-between">
+        <el-row class="mainBody bgFFF">
+          <el-row class="shopinstallTitile font20">
+            <el-col :span="8">选择推荐模板</el-col>
+            <el-col :span="16">可选模板</el-col>
+          </el-row>
+          <el-row class="shopInstallTemplate" :gutter="20">
+            <el-col :span="8" v-for="img in shopInstallImg" :key="img.id" >
+              
+              <div 
+                class="shopInstallImg bgImg textCen font20"
+              >
+              <!-- <router-link :to="img.id==2?'switch2':''"> -->
+                <div class="pointer" @click="goTo(img.id)"><img :src="img.cover_picture" alt=""></div>
+              
+              <!-- </router-link> -->
+               <div class="shopInstallText textCen font20">{{img.title}}</div>
+               <i class="el-icon-circle-check" v-show="img.is_use"></i>
+              </div>
+            </el-col>
+            <el-col :span="8">
+              <div class="shopInstallImg bgImg textCen font20"
+              >
+              <img :src="otherImg.url" alt="">
+               <div class="shopInstallText textCen font20">{{otherImg.title}}
+              </div>
+             </div>
+            </el-col>
+          </el-row>
+          <el-row class="shopinstallContent">
+            <p>{{shopInstalContent}}</p>
+          </el-row>
+          
+        </el-row>
+      </el-row>
+    </el-main> 
+  </el-container>
+</template>
+<script>
+import { collects, detail } from "api/shop/install";
+export default {
+  data() {
+    return {
+      use_id: 1,
+      dialogVisible: false,
+      shopInstalContent: "",
+      otherImg: {
+        title: "其他模板",
+        url: require("../../assets/shop_templet_03.png")
+      },
+      shopInstallImg: []
+    };
+  },
+  created() {
+    detail();
+  },
+  mounted() {
+    collects().then(result => {
+      console.log(result);
+      this.shopInstallImg = result.data.data;
+      this.shopInstallImg.forEach((value, index) => {
+        if (value.is_use) {
+          this.shopInstalContent = value.describe;
+          this.use_id = value.id;
+        }
+      });
+    });
+  },
+  methods: {
+    goTo(index) {
+      if (index == 2) {
+        detail(index).then(result => {
+          if (result.data.code == 200) {
+            if (!result.data.data.canUse) {
+              this.$message.error("未订购专业版，请先订购");
+            }
+          } else {
+            this.$message.error(result.data.error);
+          }
+        });
+      }
+    }
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+
+#shopInstallHome
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px
+    .mainBody
+      width 100%
+      padding 30px 10px 100px 10px
+      min-height 750px
+      .shopInstallTemplate
+        padding-top 10px
+        .el-col
+          position relative
+          .shopInstallImg
+            height auto
+            max-width 358px
+            position relative
+            border 1px solid #ccc
+            background-position top center
+            background-size 100% auto
+            border-radius 8px
+            box-shadow 0 0 10px #888888
+            padding-bottom 30px
+            img
+              width 100%
+              height auto
+            .shopInstallText
+              width 100%
+              padding-top 30px
+            .el-icon-circle-check
+              position absolute
+              top -20px
+              right -20px
+              font-size 60px
+              color #4dd865
+      .shopinstallTitile
+        .el-col
+          padding-left 20px
+      .shopinstallContent
+        padding-left 20px
+        margin-top 20px
+        width 430px
+</style>

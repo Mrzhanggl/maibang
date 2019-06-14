@@ -1,0 +1,127 @@
+<template>
+    <div class="order">
+         <div class="noData" v-if="!orderList">
+                <p>暂无订单</p>
+            </div>
+        <div class="order_content">
+            <div class="item" v-for="(item,index) in orderList" :key="index">
+                <div class="order_item_left">
+                    <p class="type">{{item.order_status_describe}}</p>
+                    <div class="order_item_left_data">
+                        <div class="img">
+                            <img :src="item.pro_img">
+                        </div>
+                        <div class="text">
+                            <p class="product_name">
+                                {{item.user_name}}
+                            </p>
+                            <p class="product_code">订单号：{{item.order_num}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="order_item_right">{{item.add_time}}</div>
+            </div>
+        </div>
+         <div class="pagination" v-if="orderList">
+              <el-pagination
+                layout="prev, pager, next"
+                :total="total">
+            </el-pagination>
+            <span v-if="orderList">
+                <p>共{{orderList.length}}条,每页20条</p>
+            </span>
+        </div>
+    </div>
+</template>
+<script>
+import { getOrderList } from "@/api/customer/order/order";
+export default {
+  data() {
+    return {
+      orderList: null,
+      page: 1,
+      total: null
+    };
+  },
+  methods: {
+    //请求通知列表
+    getOrderListFn() {
+      let data = {
+        page: this.page
+      };
+      getOrderList(data).then(res => {
+        console.log(res);
+        this.orderList = res.data.data.orderMsgList;
+        console.log(this.orderList,"这是数据")
+        this.total = res.data.data.pageSum * 10 
+      });
+    }
+  },
+  mounted() {
+    this.getOrderListFn();
+  }
+};
+</script>
+<style scoped>
+ .item{
+     width: 520px;
+	height: 120px;
+	background-color: #f2f2f2;
+	border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+     font-size: 14px;
+     margin-top: 10px;
+    
+ }
+ .order_item_left_data{
+     display: flex;
+     justify-content: space-between
+ }
+ .type{
+     color: #1491f2;
+     margin-bottom: 10px;
+ }
+ .img img{
+     width: 70px;
+     height: 70px;
+     background: white;
+     border-radius: 5px;
+ }
+ .text{
+     display: flex;
+     flex-direction: column;
+     margin-left: 10px;
+     justify-content: space-around
+ }
+ .order_item_right{
+     font-size: 12px;
+ }
+ .pagination{
+    width: 520px;
+    text-align: center;
+    font-size: 13px;
+    position: relative;
+    margin-top: 20px;
+}
+.pagination span{
+    position: absolute;
+    top: 50%;
+    height: 20px;
+    margin-top: -10px;
+    line-height: 20px;
+    right: 0
+}
+.noData {
+  width: 520px;
+  height: 80px;
+  font-size: 14px;
+  line-height: 80px;
+  text-align: center;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  border-radius: 5px;
+  color: #666666;
+}
+</style>

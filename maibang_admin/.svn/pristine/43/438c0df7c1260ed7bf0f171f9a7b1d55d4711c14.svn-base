@@ -1,0 +1,93 @@
+import store from '../store'
+
+export function b64EncodeUnicode(str) { //转换为b64
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
+export function b64DecodeUnicode(str) { //64转
+    return decodeURIComponent(
+      atob(str)
+        .split("")
+        .map(function(c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+  }
+
+  export function timetrans(date){ //时间戳转换为时间
+    var date = new Date(date*1000);//如果date为13位不需要乘1000
+    var Y = date.getFullYear() + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+    var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+    var m = (date.getMinutes() <10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+    var s = (date.getSeconds() <10 ? '0' + date.getSeconds() : date.getSeconds());
+    return Y+M+D+h+m+s;
+}
+// export function js_strto_times(str_time){  //转换为时间戳
+//     var new_str = str_time.replace(/:/g,"-");  
+//     new_str = new_str.replace(/ /g,"-");  
+//     var arr = new_str.split("-");  
+//     var datum = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],arr[3]-8,arr[4]));  
+//     return strtotime = datum.getTime()/1000;  
+
+// } 
+// export function ws(data) {
+//     var ws = new WebSocket('ws://192.168.1.254:9000');
+//     console.log(ws)
+//     ws.onopen = function (evt) {
+//         console.log(data)
+//         ws.send(data);
+//     };
+// }
+export const ws = {
+    wsServer: "ws://192.168.1.254:9000",
+    ws: null,
+    init: function (data) {
+        this.ws = new WebSocket(this.wsServer);
+        let that = this
+        let timer = setInterval(function(){
+            if (that.ws.readyState === that.ws.OPEN){
+                clearInterval(timer)
+                let socket = {
+                    "name": "identityVerify",
+                    "data": {
+                        "userId": localStorage.getItem("userId"),    // 用户ID
+                        "platform": 5,    // 发出消息的平台（1：汽配帮手，2：C端微信，3：C端QQ，4：C端浏览器，5：B端PC）
+                        "merchantId": localStorage.getItem("storeId"),    // B端socket认证需要此参数
+                    }
+                }
+                console.log(JSON.stringify(socket))
+                that.ws.send(JSON.stringify(socket))
+                console.log("发送验证成功")
+                
+            }
+        },300)
+       
+        this.ws.onmessage = function (evt) {
+            console.log(JSON.parse(evt.data),"数据")
+            let data = JSON.parse(evt.data)
+            console.log('接收服务端推送的信息: '+ evt.data);
+            if(data.name == 'receiveUserMessage'){
+                store.dispatch("updateChat")
+            }
+           
+        };
+        this.ws.onerror = function (evt) {
+            console.log('socket连接错误: ' + evt);
+        };
+    },
+    sendData: function (data) {
+        if (this.ws.readyState === this.ws.OPEN) {
+            console.log(data)
+            this.ws.send(JSON.stringify(data))
+            console.log("发送成功")
+        }
+    },
+    submit: function (msg) {
+
+    }
+}
+

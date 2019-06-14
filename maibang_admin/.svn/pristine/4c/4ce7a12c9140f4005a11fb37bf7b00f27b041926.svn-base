@@ -1,0 +1,134 @@
+<template>
+  <div id="orderService">
+    <el-container>
+      <el-header class="bgFFF">
+        <sideHeader></sideHeader>
+      </el-header>
+      <el-main>
+        <el-row class="mainBody" type="flex" justify="center">
+          <el-col :span="16">
+            <el-row type="flex" justify="center">
+              <el-col :span="16">
+                <el-steps :active="active" finish-status="success" align-center>
+                  <el-step title="立即订购"></el-step>
+                  <el-step title="确认订购信息"></el-step>
+                  <el-step title="确认付款"></el-step>
+                  <el-step title="完成订购"></el-step>
+                </el-steps>
+              </el-col>
+            </el-row>
+            <div class="line "></div>
+            <el-row class="items" type="flex" justify="center">
+              <el-row>
+                <el-col class="itemHeader colorFFF">
+                 <p>{{form.title}}1年期</p>
+                 <p class="money font14 "><span class="colorRed">￥{{form.price}}</span>/1年期</p>
+                 <el-button plain @click="immediately">立即订购</el-button>
+                </el-col>
+                <el-col class="itemBody font14">
+                  <p class="color999">功能</p>
+                  <ul >
+                    <li v-for="(item,index) in form.version_explain" :key="index">
+                      {{item}}
+                    </li>
+                  </ul>
+                </el-col>
+              </el-row>
+              
+            </el-row>
+          </el-col>
+          
+        </el-row>
+        
+      </el-main>
+    </el-container>
+  </div>
+</template>
+<script>
+import sideHeader from "./components/sideHeader.vue";
+import { getOrderService } from "api/asset/orderservice";
+export default {
+  data() {
+    return {
+      active: 0,
+      form: {
+        title: "",
+        price: "",
+        period: "",
+        version_explain: []
+      }
+    };
+  },
+  created() {},
+  mounted() {
+    this.orderService();
+  },
+  methods: {
+    //立即订购
+    immediately() {
+      this.active = 1;
+    },
+    // 初始设置
+    orderService() {
+      getOrderService().then(result => {
+        if (result.data.code == 200) {
+          console.log(result);
+          this.form.title = result.data.data[0].title;
+          this.form.price = result.data.data[0].price;
+          this.form.version_explain = result.data.data[0].version_explain;
+          this.form.period = result.data.data[0].period;
+          this.form.id = result.data.data[0].id;
+        } else {
+          this.$message.error(result.data.error);
+        }
+      });
+      console.log(this.form);
+    }
+  },
+  components: {
+    sideHeader
+  }
+};
+</script>
+<style lang="stylus" scoped>
+#orderService
+  .el-main
+    padding 10px
+    .mainBody
+      background-color #ffffff
+      min-height 750px
+      padding-bottom 50px
+      .el-steps
+        min-width 500px
+        padding 50px 0
+      .line
+        width 100%
+        height 1px
+        background-color #cccccc
+      .items
+        padding-top 50px
+        >.el-row
+          box-shadow -2px 4px 4px 0 rgba(0, 0, 0, 0.4)
+          width 300px
+          .itemHeader
+            background url('../../assets/shop/service_01.png') no-repeat
+            background-size 100% 100%
+            padding 30px 40px
+            text-align center
+            .money
+              padding 30px 0
+              span
+                font-size 24px
+                // vertical-align middle
+            .el-button
+              width 160px
+          .itemBody
+            padding 30px 30px 130px 30px
+            background url('../../assets/shop/service_02.png') no-repeat
+            background-size 100% 100%
+            ul
+              padding-left 20px
+              li
+                line-height 30px
+                list-style-type disc
+</style>

@@ -1,0 +1,529 @@
+<template>
+  <!-- 主体认证 -->
+  <el-container id="shopAuthenticationEnterprise">
+    <el-header  class="bgFFF">
+    <el-breadcrumb>
+      <el-breadcrumb-item>
+        主体认证
+      </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <el-main>
+      <el-row type="flex" justify="space-between">
+        <el-row class="mainBody bgFFF" justify="center" type="flex">
+          <el-col>
+            <p class="beforBgblue">
+              <i class="bgBlue"></i>
+            汽配帮手认证说明：如果您是个人商家、通过实名认证、可以管理金库、发布刷刷推文等</p>
+            <p class="beforBgblue">
+              <i class="bgBlue"></i>
+            主体信息</p>  
+            <el-row type="flex" justify="center">
+              <el-radio-group v-model="radio">
+              <el-radio :label="1">个人认证</el-radio>
+              <el-radio :label="2">企业认证</el-radio>
+            </el-radio-group>
+            </el-row>
+            
+            <el-row class="shopAuthenticationForm">
+                <!-- 个人认证表单 -->
+                 <transition name="fade" mode="out-in">
+                  <el-form 
+                  ref="personalForm" 
+                  :model="personalForm"
+                  status-icon 
+                  label-width="200px" 
+                  v-if="radio==1" 
+                  :rules="personalRules">
+                    <el-form-item label="证件姓名:" prop="personalName" >
+                      <el-input v-model="personalForm.personalName">
+                      </el-input>
+                    </el-form-item>
+                    <el-form-item label="证件号码:" prop="personalIdNum">
+                      <el-input v-model="personalForm.personalIdNum"></el-input>
+                    </el-form-item>
+                    <!-- 身份证正面上传 -->
+                    <el-form-item 
+                    label="身份证正面:"
+                    prop="personalImg"
+                    >
+                      <el-row type="flex" justify="space-around">
+                        <el-col :span="10">
+                           <el-upload
+                        class="avatar-uploader"
+                        action="https://easy-mock.com/mock/5af24ea78b04ba36ed89b500/mb/upload"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccess"
+                        :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                      </el-upload>
+                        </el-col>
+                        <el-col :span="10">
+                          <span>示例:</span>
+                          <i class="examplesImg"><img src="" alt=""></i>
+                          
+                        </el-col>
+                      </el-row>
+                    </el-form-item>
+                    <!-- 身份证反面上传 -->
+                    <el-form-item 
+                    label="身份证反面:"
+                    >
+                      <el-row type="flex" justify="space-around">
+                        <el-col :span="10">
+                           <el-upload
+                        class="avatar-uploader"
+                        action="https://easy-mock.com/mock/5af24ea78b04ba36ed89b500/mb/upload"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccessBg"
+                        :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrlBg" :src="imageUrlBg" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                      </el-upload>
+                        </el-col>
+                        <el-col :span="10">
+                          <span>示例:</span>
+                          <i class="examplesImg"><img src="" alt=""></i>
+                        </el-col>
+                      </el-row>
+                    </el-form-item>
+                    <el-form-item>
+                      <p>注意：提交申请前请确认信息是否正确，信息错误将导致审核不能修改，审核通过后，营业执照，法人法人姓名，身份证将不能修改，请您认真确认提交申请的信息。</p>
+                    </el-form-item>
+                    <el-form-item class="onSubmitPersonal">
+                      <el-row type="flex" justify="center">
+                      <el-button type="primary" @click="submitPersonal('personalForm')">提交认证</el-button>
+                      </el-row>
+                    </el-form-item>
+                  </el-form>
+                 </transition>
+                <transition name="fade" mode="out-in">
+                <!-- 企业认证表单 -->
+              
+                  <el-form 
+                  ref="enterpriseForm" :model="enterpriseForm" 
+                  label-width="200px" 
+                  v-if="radio==2"
+                  :rules="enterpriseRules"
+                  >
+                    <el-form-item 
+                    label="企业名称:"
+                    prop="enterpriseName"
+                    >
+                      <el-input v-model="enterpriseForm.enterpriseName"></el-input>
+                    </el-form-item>
+                    <el-form-item 
+                    label="企业法人:"
+                    prop="enterprisePerson"
+                    >
+                      <el-input v-model="enterpriseForm.enterprisePerson"></el-input>
+                    </el-form-item>
+                    <el-form-item 
+                    label="身份证号码:"
+                    prop="enterpriseNum"
+                    >
+                      <el-input v-model="enterpriseForm.enterpriseNum"
+                      maxlength="18"></el-input>
+                    </el-form-item>
+                    <el-form-item 
+                    label="营业执照认证:"
+                    prop="licenseName"
+                    >
+                      <el-input v-model="enterpriseForm.licenseName"
+                      maxlength="18"></el-input>
+                    </el-form-item>
+                    <!-- 营业执照上传 -->
+                    <el-form-item label="营业执照:">
+                      <el-row type="flex" justify="space-around">
+                        <el-col :span="10">
+                           <el-upload
+                        class="avatar-uploader"
+                        action="https://easy-mock.com/mock/5af24ea78b04ba36ed89b500/mb/upload"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccessLicense"
+                        :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrlLicense" :src="imageUrlLicense" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                      </el-upload>
+                        </el-col>
+                        <el-col :span="10">
+                          <span>示例:</span>
+                          <i class="examplesImg"><img src="" alt=""></i>               
+                        </el-col>
+                      </el-row>
+                    </el-form-item>
+                    <!-- 身份证正面上传 -->
+                    <el-form-item label="身份证正面:">
+                      <el-row type="flex" justify="space-around">
+                        <el-col :span="10">
+                           <el-upload
+                        class="avatar-uploader"
+                        action="https://easy-mock.com/mock/5af24ea78b04ba36ed89b500/mb/upload"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccessEn"
+                        :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrlEn" :src="imageUrlEn" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                      </el-upload>
+                        </el-col>
+                        <el-col :span="10">
+                          <span>示例:</span>
+                          <i class="examplesImg"><img src="" alt=""></i>               
+                        </el-col>
+                      </el-row>
+                    </el-form-item>
+                    <!-- 身份证反面上传 -->
+                    <el-form-item label="身份证反面:">
+                      <el-row type="flex" justify="space-around">
+                        <el-col :span="10">
+                           <el-upload
+                        class="avatar-uploader"
+                        action="https://easy-mock.com/mock/5af24ea78b04ba36ed89b500/mb/upload"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccessEnBg"
+                        :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrlEnBg" :src="imageUrlEnBg" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                      </el-upload>
+                        </el-col>
+                        <el-col :span="10">
+                          <span>示例:</span>
+                          <i class="examplesImg"><img src="" alt=""></i>
+                          
+                        </el-col>
+                      </el-row>
+                    </el-form-item>
+                    <el-form-item>
+                      <p>注意：提交申请前请确认信息是否正确，信息错误将导致审核不能修改，审核通过后，营业执照，法人法人姓名，身份证将不能修改，请您认真确认提交申请的信息。</p>
+                    </el-form-item>
+                    <el-form-item class="onSubmitEnterprise"  >
+                      <el-row type="flex" justify="center">
+                      <el-button type="primary" @click="submitEnterprise('enterpriseForm')">提交认证</el-button>
+                      </el-row>
+                    </el-form-item>
+                  </el-form>
+                </transition>
+                    
+            </el-row>
+            
+          </el-col>
+          
+        </el-row>
+ 
+      </el-row>
+    </el-main>
+  </el-container>
+</template>
+<script>
+import {
+  judgecertification,
+  userrealname,
+  setMerchantNotice,
+  enterpriseverify,
+  shopcertification,
+  ImgUploads
+} from "api/shop/authentication";
+export default {
+  data() {
+    let idNum = (rule, value, callback) => {
+      let reg = /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/;
+      if (!reg.test(value)) {
+        callback(new Error("请输入正确的身份证号码"));
+      } else {
+        callback();
+      }
+    };
+    let licenseName = (rule, value, callback) => {
+      let licenseReg = /^([0-9a-zA-Z]{18}$|\d{15}$)/;
+      if (!licenseReg.test(value)) {
+        callback(new Error("请输入正确的营业执照号码"));
+      } else {
+        callback();
+      }
+    };
+
+    return {
+      radio: 1,
+      imageUrl: "",
+      imageUrlBg: "",
+      imageUrlEn: "",
+      imageUrlEnBg: "",
+      imageUrlLicense: "",
+      personalForm: {
+        personalName: "",
+        personalIdNum: "",
+        personalImg: ""
+      },
+      enterpriseForm: {
+        id: "",
+        enterpriseName: "",
+        licenseName: "",
+        enterprisePerson: "",
+        enterpriseNum: ""
+      },
+      // 个人表单验证
+      personalRules: {
+        //  姓名验证
+        personalName: [
+          {
+            required: true,
+            message: "姓名不能为空",
+            trigger: "blur"
+          },
+          {
+            min: 2,
+            max: 20,
+            message: "长度在 2 到 20 个字符",
+            trigger: "blur"
+          }
+        ],
+        //  身份证号码验证
+        personalIdNum: [
+          {
+            required: true,
+            message: "身份证号码不能为空",
+            trigger: "blur"
+          },
+          {
+            validator: idNum,
+            trigger: "blur"
+          }
+        ]
+      },
+      // 企业表单验证
+      enterpriseRules: {
+        // 企业姓名
+        enterpriseName: [
+          {
+            required: true,
+            message: "企业名称不能为空",
+            trigger: "blur"
+          },
+          {
+            min: 4,
+            message: "长度不能小于4个字符",
+            trigger: "blur"
+          }
+        ],
+        // 企业法人
+        enterprisePerson: [
+          {
+            required: true,
+            message: "企业法人不能为空",
+            trigger: "blur"
+          },
+          {
+            min: 2,
+            message: "请输入正确的姓名",
+            trigger: "blur"
+          }
+        ],
+        licenseName: [
+          {
+            required: true,
+            message: "营业执照号码不能为空",
+            trigger: "blur"
+          },
+          {
+            validator: licenseName,
+            trigger: "blur"
+          }
+        ],
+        enterpriseNum: [
+          {
+            required: true,
+            message: "身份证号码不能为空",
+            trigger: "blur"
+          },
+          {
+            validator: idNum,
+            trigger: "blur"
+          }
+        ]
+      }
+    };
+  },
+  beforeCreate() {
+    localStorage.setItem("judgecertification", 1);
+    if (localStorage.getItem("judgecertification")) {
+      this.$router.push("success");
+    }
+  },
+  mounted() {
+    judgecertification().then(result => {
+      console.log(result);
+    });
+  },
+  methods: {
+    handleAvatarSuccessLicense(res, file) {
+      this.imageUrlLicense = URL.createObjectURL(file.raw);
+    },
+    handleAvatarSuccessEn(res, file) {
+      this.imageUrlEn = URL.createObjectURL(file.raw);
+    },
+    handleAvatarSuccessBg(res, file) {
+      this.imageUrlBg = URL.createObjectURL(file.raw);
+    },
+    handleAvatarSuccessEnBg(res, file) {
+      this.imageUrlEnBg = URL.createObjectURL(file.raw);
+    },
+    handleAvatarSuccess(res, file) {
+      this.imageUrl = URL.createObjectURL(file.raw);
+    },
+    beforeAvatarUpload(file) {
+      const isJPG =
+        file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/jpg" ||
+        file.type === "image/gif";
+      const isLt2M = file.size / 1024 / 1024 < 4;
+      if (!isJPG) {
+        this.$message.error("请使用png/jpeg/gif/jpg格式的图片!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 4MB!");
+      }
+      return isLt2M;
+    },
+    submitPersonal(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          setMerchantNotice({
+            corporation_name: this.personalForm.personalName,
+            idcard_num: this.personalForm.personalIdNum,
+            relative_idcard_front: this.imageUrl,
+            relative_idcard_contrary: this.imageUrlBg
+          })
+            .then(result => {
+              if (result.data.code == 200) {
+                this.$message({
+                  message: "提交认证成功",
+                  type: "success"
+                });
+              } else {
+                this.$message({
+                  message: result.data.error,
+                  type: "error"
+                });
+              }
+              this.$refs[formName].resetFields();
+              this.imageUrl = "";
+              this.imageUrlBg = "";
+            })
+            .catch(err => {});
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    // 提交企业认证
+    submitEnterprise(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          enterpriseverify({
+            id: this.enterpriseForm.id,
+            name: this.enterpriseForm.enterpriseName,
+            shop_license: this.enterpriseForm.licenseName,
+            shop_corporation: this.enterpriseForm.enterprisePerson,
+            id_number: this.enterpriseForm.id,
+            id: this.enterpriseForm.id,
+            id: this.enterpriseForm.id,
+            id: this.enterpriseForm.id
+          }).then(result => {
+            if (result.data.code == 200) {
+              this.$message({
+                message: "提交认证成功",
+                type: "success"
+              });
+            } else {
+              this.$message({
+                message: result.data.error,
+                type: "error"
+              });
+            }
+            this.$refs[formName].resetFields();
+            this.imageUrlEn = "";
+            this.imageUrlEnBg = "";
+            this.imageUrlLicense = "";
+          });
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+.avatar-uploader
+  border 1px dashed #d9d9d9
+  width 180px
+  height 116px
+  border-radius 6px
+  cursor pointer
+  position relative
+  overflow hidden
+  .avatar-uploader-icon
+    font-size 28px
+    color #8c939d
+    width 180px
+    height 116px
+    line-height 116px
+    text-align center
+  .avatar
+    width 180px
+    height 116px
+    display block
+.avatar-uploader:hover
+  border-color #1491f2
+#shopAuthenticationError
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px 10px 50px 10px
+    .mainBody
+      width 100%
+      min-width 750px
+      padding 10px
+      >.el-col
+        width 800px
+        .beforBgblue
+          i
+            display inline-block
+            width 4px
+            height 16px
+            vertical-align middle
+        .beforBgblue:first-of-type
+          margin-bottom 50px
+          margin-top 20px
+        .beforBgblue:last-of-type
+          margin-bottom 30px
+        >.el-row
+          margin-bottom 30px
+        .shopAuthenticationForm
+          .el-input
+            width 230px
+          .onSubmitPersonal
+            margin-bottom 10px
+            .el-button
+              width 180px
+          .onSubmitEnterprise
+            margin-bottom 10px
+            .el-button
+              width 180px
+  .examplesImg
+    width 180px
+    height 116px
+    display inline-block
+    background-color red
+    img
+      width 180px
+      height auto
+</style>
+

@@ -1,0 +1,134 @@
+<template>
+  <!-- 线下网点 -->
+  <el-container id="shopOfflineOnline">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb>
+        <el-breadcrumb-item>
+          线下网点管理
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row type="flex" justify="space-between">
+        <el-row class="mainBody bgFFF">
+          <el-col class="shopHeader">
+            <el-row type="flex" justify="space-between">
+              <el-col class="shopHeaderLeft">
+                <span class="choiceInput pointer font14" :class="choice===1?'activeInput colorFFF':''" @click="allOnline">全部网点</span>
+                <span class="choiceInput pointer font14" :class="choice===2?'activeInput colorFFF':''" @click="offlineOnline">线下网点</span>
+                <span class="choiceInput pointer font14" :class="choice===3?'activeInput colorFFF':''" @click="buyOnline">买家自提点</span>
+            </el-col>
+            <el-col class="shopHeaderRight">
+              <el-button plain size="small">添加线下网点</el-button>
+               <el-input
+                  placeholder="线下网点搜索"
+                  size="small"
+                  v-model="searchText"
+                >
+                <i slot="prefix" class="el-input__icon el-icon-search"></i>
+              </el-input>
+            </el-col>
+            </el-row>
+            
+          </el-col>
+          <el-col class="shopMain">
+
+          </el-col>
+        </el-row>
+      </el-row>
+    </el-main>
+    
+  </el-container>
+</template>
+<script>
+import {
+  outletsDetail,
+  outletsList,
+  saveOutlets,
+  deleteOutlets
+} from "api/shop/online";
+export default {
+  data() {
+    return {
+      choice: 1, //判断选择按钮
+      searchText: "", //搜索内容
+      items: [
+        {
+          id: 0,
+          outlets_type: ["1"],
+          store_name: "",
+          store_address_bz: {
+            areaId: "",
+            areaName: "",
+            cityId: "",
+            cityName: "",
+            provinceId: "",
+            provinceName: ""
+          },
+          address: "",
+          img_ids: {
+            pic_path: "",
+            relative_path: "",
+            pic_thum: "",
+            relative_path_thum: ""
+          }
+        }
+      ]
+    };
+  },
+  mounted() {},
+  created() {
+    this.reset();
+  },
+  methods: {
+    // 重置数据
+    reset() {
+      outletsList();
+    },
+    // 点击获取全部网点
+    allOnline() {
+      this.choice = 1;
+    },
+    // 点击获取线下网点
+    offlineOnline() {
+      this.choice = 2;
+    },
+    // 点击获取买家自提点
+    buyOnline() {
+      this.choice = 3;
+    }
+  }
+};
+</script>
+<style lang="stylus" scoped>
+#shopOfflineOnline
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px
+    .mainBody
+      width 100%
+      padding 20px 10px
+      min-height 750px
+      .shopHeader
+        padding-bottom 10px
+        .shopHeaderLeft
+          min-width 300px
+          .activeInput
+            background-color #1491f2
+          .choiceInput
+            padding 0 18px
+            line-height 32px
+            display inline-block
+            border-radius 4px
+        .shopHeaderRight
+          min-width 400px
+          text-align right
+          .el-input
+            width 220px
+</style>
+

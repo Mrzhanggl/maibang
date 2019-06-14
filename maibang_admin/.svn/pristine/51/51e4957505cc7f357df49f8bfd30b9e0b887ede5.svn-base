@@ -1,0 +1,23 @@
+import request from "@/utils/request";
+// 获取菜单信息
+export const menu = () => {
+  return request({
+    url: "/pc_seller/WechatMenu/menu",
+    method: "post"
+  });
+
+}
+
+//提交菜单信息
+
+export const submitMenu = (button) => {
+  let data = {
+    button
+  }
+  console.log(data);
+  return request({
+    url: "/pc_seller/WechatMenu/submitMenu",
+    method: "post",
+    data
+  });
+}

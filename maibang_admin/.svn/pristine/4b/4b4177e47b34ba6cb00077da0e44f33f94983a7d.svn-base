@@ -1,0 +1,222 @@
+<template>
+    <div class="allCustomer">
+                <!-- 员工 -->
+         <el-table
+          :data="customerData"
+         >
+          <el-table-column
+                type="selection"
+                width="55">
+              </el-table-column>
+          <el-table-column
+          width="400"
+            label="客户备注">
+            <template slot-scope="scope">
+                <div class="notes_content">
+                    <div class="notes_content_left">
+                        <div class="img">
+                            <img :src="scope.row.headimgurl">
+                        </div>
+                        <div class="customerText">
+                            <span>{{scope.row.remark_name}}</span>
+                            <span>不知道是什么</span>
+                            <span>不知道是什么</span>
+                        </div>
+                    </div>
+                       <div class="notes_content_right">
+                        <div class="identity">
+                            <span v-if="scope.row.ifStaff == 1">
+                                <div class="identity_img">
+                                   <img src="../../../images/customer/yuangong.png">
+                                </div>
+                                <p>团队员工</p>
+                            </span>
+                            <span v-if="scope.row.cooperation == 1">
+                                <div class="identity_img">
+                                   <img src="../../../images/customer/hezuo.png">
+                                </div>
+                                <p>合作客户</p>
+                            </span>
+                             <span v-if="scope.row.platform_type == 1">
+                                 <div class="identity_img">
+                                   <img src="../../../images/customer/weixin.png">
+                                 </div>
+                                <p>微信公众号粉丝</p>
+                            </span>
+                            <span v-if="scope.row.platform_type == 2">
+                                <div class="identity_img">
+                                   <img src="../../../images/customer/qq.png">
+                                </div>
+                                <p>QQ</p>
+                            </span>
+                            <span v-if="scope.row.platform_type == 3">
+                                <div class="identity_img">
+                                  <img src="../../../images/customer/qita.png">
+                                </div>
+                                <p>其它</p>
+                            </span>
+                             <span v-if="scope.row.platform_type == 4">
+                                 <div class="identity_img">
+                                   <img src="../../../images/customer/xiaochengxu.png">
+                                 </div>
+                                <p>小程序粉丝</p>
+                            </span>
+                        </div>
+                       </div>
+                </div>
+                
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="公司/电话">
+            <template slot-scope="scope">
+                <p>{{scope.row.ramark_company}}</p>
+                <p v-if="!scope.row.ramark_company">暂无公司</p>
+                <p>{{scope.row.phone}}</p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="经手业务员">
+            <template slot-scope="scope">
+                <p v-if="scope.row.staffInfo">{{scope.row.staffInfo.staff_name}}</p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            >
+            <template slot-scope="scope">
+              <p>针对当前客户修改商品价格</p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="操作"
+            width="110">
+            <template slot-scope="scope">
+             <div class="operation">
+              <el-button  type="primary" size="mini">消费记录</el-button>
+              <el-button type="primary" size="mini">发信息</el-button>
+             </div>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="demonstration">
+            <el-pagination
+                layout="prev, pager, next"
+                :total="total">
+            </el-pagination>
+        </div>
+    </div>
+</template>
+<script>
+import { searchCustomer,clientsgroup } from "@/api/customer/customer.js"
+export default {
+    data(){
+        return{
+            customerData:[],
+            total: null,
+            page: 1
+        }
+    },
+    watch:{
+        searchText(val){
+            this.searchCustomerFn()
+        }
+    },
+    props:["searchText"],
+    methods:{
+        getCustomerFn(){
+            let data = {
+                page: this.page,
+                type: 2
+            }
+            clientsgroup(data).then(res=>{
+                this.customerData = res.data.data.userList
+                this.total = res.data.data.clientsCount * 10
+            })
+        },
+        searchCustomerFn(){ //搜索
+        let data = {
+            sel_text: this.searchText,
+            type: 2,
+            page: this.page
+        }
+          searchCustomer(data).then(res=>{
+              this.customerData = res.data.data.userList
+              this.total = res.data.data.clientsCount * 10
+          })
+        }
+    },
+    mounted(){
+      this.getCustomerFn()
+    }
+}
+</script>
+
+<style scoped>
+   .allCustomer >>> .el-table th{
+    background-color: #f8f8f8;
+  }
+  .allCustomer >>> .el-select{
+    width: 100% !important
+  }
+  .notes_content{
+      display: flex;
+      justify-content: space-between
+  }
+  .notes_content_left{
+      display: flex;
+      justify-content: space-between
+  }
+  .customerText{
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      margin-left:10px;
+  }
+  .notes_content_right{
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex: 0 0 120px;
+  }
+  .identity{
+        display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left
+  }
+  .identity span{
+      display: flex;
+      align-items: center;
+      color: #999999;
+      font-size: 12px;
+  }
+  .identity_img{
+      text-align: center;
+      width: 27px;
+      display: flex;
+      align-items: center
+  }
+   .identity span img{
+      height: 16px;
+  }
+  .img img{
+      width: 70px;
+      height: 70px;
+  }
+  .allCustomer >>> .el-button--mini, .el-button--small{
+      width: 80px;
+  }
+  .operation{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+  }
+  .el-button+.el-button{
+      margin: 5px 0
+  }
+ .demonstration{
+     text-align: center
+ }
+</style>

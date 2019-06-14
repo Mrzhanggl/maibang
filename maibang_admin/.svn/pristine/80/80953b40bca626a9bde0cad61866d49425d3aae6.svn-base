@@ -1,0 +1,115 @@
+import store from '../store'
+
+export function b64EncodeUnicode(str) { //转换为b64
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
+export function b64DecodeUnicode(str) { //64转
+    return decodeURIComponent(
+      atob(str)
+        .split("")
+        .map(function(c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")              
+    );
+  }
+
+  export function timetrans(date){ //时间戳转换为时间
+    var date = new Date(date*1000);//如果date为13位不需要乘1000
+    var Y = date.getFullYear() + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+    var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+    var m = (date.getMinutes() <10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+    var s = (date.getSeconds() <10 ? '0' + date.getSeconds() : date.getSeconds());
+    return Y+M+D+h+m+s;
+}
+
+export const ws = {
+    wsServer: "ws://192.168.1.254:9000",
+    ws: null,
+    init: function (data) {
+        this.ws = new WebSocket(this.wsServer);
+        let that = this
+        let timer = setInterval(function(){
+            if (that.ws.readyState === that.ws.OPEN){
+                clearInterval(timer)
+                let socket = {
+                    "name": "identityVerify",
+                    "data": {
+                        "userId": localStorage.getItem("userId"),    // 用户ID
+                        "platform": 5,    // 发出消息的平台（1：汽配帮手，2：C端微信，3：C端QQ，4：C端浏览器，5：B端PC）
+                        "merchantId": localStorage.getItem("storeId"),    // B端socket认证需要此参数
+                    }
+                }
+                console.log(JSON.stringify(socket))
+                that.ws.send(JSON.stringify(socket))
+                console.log("发送验证成功")
+                
+            }
+        },300)
+       
+        this.ws.onmessage = function (evt) {
+            console.log(JSON.parse(evt.data),"数据")
+            let data = JSON.parse(evt.data)
+            console.log('接收服务端推送的信息: '+ evt.data);
+            if(data.name == 'receiveMessageSendStatus'){
+                store.dispatch("updateChat")
+            }
+            if(data.name == 'receiveUserMessage'){
+                store.dispatch("updateChat")
+                console.log(data.data.senderId)
+                let message = sessionStorage.getItem(data.data.senderId) ? JSON.parse(sessionStorage.getItem(data.data.senderId)) : []
+                let content = {
+                    messageType: 'receive',
+                    content: b64DecodeUnicode(data.data.content),
+                    time: timetrans(data.data.sendTime)
+                }
+                console.log(content.content)
+                // alert(typeof content.content)
+                if(data.data.messageType == 2){ //商品处理
+                     content.content = JSON.parse(content.content)
+                      content.content.type = 'product'
+                      for(let key in content.content){
+                        content[key] = content.content[key]
+                     }
+                 }
+                 if(data.data.messageType == 4){
+                    //  let item = {
+                    //      type: 'img',
+                    //      content: content.content
+                    //  }
+                    //  content.content = item
+                     content.type = 'img'
+
+                     
+                 }
+              
+                console.log(content,"这是商品")
+                message.push(content)
+                sessionStorage.setItem(data.data.senderId,JSON.stringify(message))
+            }
+           
+        };
+        this.ws.onerror = function (evt) {
+            console.log('socket连接错误: ' + evt);
+        };
+    },
+    sendData: function (data) {
+        if (this.ws.readyState === this.ws.OPEN) {
+            console.log(data)
+            this.ws.send(JSON.stringify(data))
+            console.log("发送成功")
+        }
+    },
+    sendChangeMessageStatus: function(data){ //变成已读
+        if (this.ws.readyState === this.ws.OPEN) {
+            console.log(data)
+            this.ws.send(JSON.stringify(data))
+            console.log(JSON.stringify(data),"发送成功")
+        }
+    }
+}
+

@@ -1,0 +1,180 @@
+<template>    
+    <div id="notBeginning">
+        <el-button type="prinary" size="mini" class="addgoods">添加商品</el-button> 
+        <el-table
+    ref="multipleTable"
+    :data="tableData3"
+    tooltip-effect="dark"
+    style="width: 100%"
+    @selection-change="handleSelectionChange">
+    <el-table-column
+      type="selection"
+      width="55">
+    </el-table-column>
+    <el-table-column
+      label="商品"
+      width="360">
+      <template slot-scope="scope">
+          <div class="goods-exhibition">
+            <div class="goods-pic">                
+            </div>
+            <div class="goods-data">
+                <p>铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞</p>
+                <p>编码：123456789</p>
+                <p><span class="color-red">折后价￥22.00</span><span>&yen; 50.00</span></p>                                      
+                <!-- <el-button type="primary" size="mini">还有更多商品</el-button > -->
+            </div>
+          </div>
+      </template>
+    </el-table-column>
+    <el-table-column
+      prop="attribute"
+      label="属性"
+      width="280">
+    </el-table-column>
+    <el-table-column
+      prop="time"
+      label="开始时间"
+      show-overflow-tooltip
+      width="200">
+    </el-table-column>
+    <el-table-column      
+      label="操作"
+      show-overflow-tooltip>
+        <template slot-scope="scope">
+            {{ scope.row.operation }}
+        </template>
+    </el-table-column>
+  </el-table>
+  <!-- <div style="margin-top: 20px">
+    <el-button @click="toggleSelection([tableData3[1], tableData3[2]])">切换第二、第三行的选中状态</el-button>
+    <el-button @click="toggleSelection()">取消选择</el-button>
+  </div> -->             
+    <el-button type="prinary" size="mini" class="recovery">恢复原价</el-button>
+  <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page.sync="currentPage1"
+      :page-size="20"
+      layout="total, prev, pager, next"
+      :total="100">
+    </el-pagination>
+    </div>  
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        tableData3: [{
+          date: '2016-05-03',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }, {
+          date: '2016-05-02',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }, {
+          date: '2016-05-04',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }, {
+          date: '2016-05-01',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }, {
+          date: '2016-05-08',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }, {
+          date: '2016-05-06',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }, {
+          date: '2016-05-07',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '操作',
+        }],
+        multipleSelection: [],
+        currentPage1: 1,        
+      }
+    },
+
+    methods: {
+      toggleSelection(rows) {
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      handleSizeChange(val) {
+        console.log(`每页 ${val} 条`);
+      },
+      handleCurrentChange(val) {
+        console.log(`当前页: ${val}`);
+      }
+    }
+  }
+</script>
+<style scoped>
+#notBeginning >>> .el-pagination{
+    text-align: center;    
+}
+.goods-exhibition{           
+    display: flex;
+    justify-content: space-between;   
+    padding-right: 60px;    
+    display: flex;
+    justify-content: space-between;    
+    align-items: center;
+}
+.goods-pic{
+    background-color: #333;
+    width: 60px;
+    height: 60px;             
+    position: relative;    
+}
+.goods-data{        
+    width: 200px;                        
+    font-size: 14px;           
+}
+.goods-data .price{
+    display: inline-block;
+    color: #333; 
+    margin-top: 3px;    
+}
+.goods-data p:first-child{
+    font-size: 14px;
+    overflow: hidden;/*内容超出后隐藏*/
+    text-overflow: ellipsis;/* 超出内容显示为省略号*/
+    white-space: nowrap;/*文本不进行换行*/
+    color: #333;
+}
+.goods-data p{    
+    color: #666;    
+}
+.color-red{
+    color: #ff0000;
+    padding-right: 15px;
+}
+.addgoods{
+    float:right;
+}
+.recovery{
+    position: relative;
+    top: 10px;
+}
+</style>

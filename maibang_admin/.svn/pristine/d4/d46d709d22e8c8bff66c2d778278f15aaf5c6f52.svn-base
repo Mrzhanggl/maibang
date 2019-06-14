@@ -1,0 +1,89 @@
+<template>
+<div>
+  <div :class="{'share': true,'showShare': $store.state.share.show}">
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    </div>     
+    </div>
+    <div class="script">
+    </div>
+</div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      config: {
+        common: {
+          bdSnsKey: {},
+          bdText: "迈邦汽配",
+          bdMini: "2",
+          bdMiniList: false,
+          bdPic: "",
+          bdStyle: "1",
+          bdSize: "32",
+          onBeforeClick: function(cmd, config) {
+            return {
+              bdUrl: localStorage.getItem("url")
+            };
+          }
+        },
+        share: {}
+      }
+    };
+  },
+  computed: {
+    listenshowpage1() {
+      return this.$store.state.share.url;
+    }
+  },
+  watch: {
+    listenshowpage1(val) {
+      this.del();
+      this.init();
+    }
+  },
+  methods: {
+    init: function() {
+      window._bd_share_config = this.config;
+      let url =
+        "http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=" +
+        ~(-new Date() / 36e5);
+      let script = document.createElement("script");
+      script.setAttribute("src", url);
+      document.querySelector("script").appendChild(script);
+    },
+    del() {
+      var otherJs = document.getElementsByTagName("script");
+      var nodes = document.querySelector("script").childNodes;
+      console.log(nodes);
+      if (nodes.length > 0) {
+        document.querySelector("script").removeChild(nodes[0]);
+      }
+      // }
+    }
+  }
+};
+</script>
+
+<style lang="stylus">
+.share{
+  padding: 0 15px;
+  background white;
+  position fixed
+  top 0
+  left 50%
+  margin-left -90px
+  z-index 10000
+  border-radius 0 0 5px 5px
+  transition: 0.3s
+  margin-top: -44px
+  height 44px
+}
+.showShare{
+  margin-top: 0
+}
+</style>

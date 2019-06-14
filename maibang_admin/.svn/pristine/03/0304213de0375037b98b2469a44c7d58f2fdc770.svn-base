@@ -1,0 +1,438 @@
+<template>
+  <!-- 线下网点 -->
+  <el-container id="shopOfflineOnline">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb>
+        <el-breadcrumb-item v-if="!addInlineChoice">
+          线下网点管理
+        </el-breadcrumb-item>
+        <el-breadcrumb-item v-else>
+          添加线下网点
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row type="flex" justify="space-between">
+        <el-row class="mainBody bgFFF" v-if="!addInlineChoice">
+          <el-col class="shopHeader">
+            <el-row type="flex" justify="space-between">
+              <el-col class="shopHeaderLeft">
+                <span class="choiceInput pointer font14" :class="choice===1?'activeInput colorFFF':''" @click="allOnline">全部网点</span>
+                <span class="choiceInput pointer font14" :class="choice===2?'activeInput colorFFF':''" @click="offlineOnline">线下网点</span>
+                <span class="choiceInput pointer font14" :class="choice===3?'activeInput colorFFF':''" @click="buyOnline">买家自提点</span>
+            </el-col>
+            <el-col class="shopHeaderRight">
+              <el-button plain size="small">添加线下网点</el-button>
+               <el-input
+                  placeholder="线下网点搜索"
+                  size="small"
+                  v-model="searchText"
+                >
+                <i slot="prefix" class="el-input__icon el-icon-search"></i>
+              </el-input>
+            </el-col>
+            </el-row>
+            
+          </el-col>
+          <el-col class="shopMain">
+          <!-- 表格 -->
+            <el-table
+              ref="onlineTable"
+              :data="items"
+              tooltip-effect="dark"
+              style="width: 100%"
+               @selection-change="handleSelectionChange"
+            >
+            <!-- 复选框 -->
+            <el-table-column
+              type="selection"
+              width="55">
+            </el-table-column>
+            <el-table-column
+              prop="name"
+              label="网点照片"
+              width="120">
+            </el-table-column>
+            </el-table>
+          </el-col>
+        </el-row>
+        <el-row class="mainBody bgFFF" v-else>
+          <el-form
+              :model="form" 
+              ref="onlineForm"
+              label-width="100px"
+              :rules="rules"
+              label-position=right
+            >
+              <el-form-item label="网点名称：" 
+              prop="store_name"
+              >
+                <el-input  
+                size="small"
+                placeholder="支持最多20个字符"
+                v-model="form.store_name"
+                maxlength="20"
+                auto-complete="off"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label=" 联系电话：">
+                  <el-col :span="8">
+                    <el-form-item prop="area_code">
+                      <el-input  
+                        size="small"
+                        v-model="form.area_code"
+                        placeholder="请输入区号" 
+                        maxlength="4"
+                        >
+                    </el-input>
+                    </el-form-item>
+                  </el-col>
+                 <el-col :span="16">
+                   <el-form-item prop="store_phone">
+                      <el-input
+                        size="small"
+                        maxlength="11"  
+                        v-model="form.store_phone"
+                        placeholder="手机,区号可留空" 
+                      >
+                  </el-input>
+                   </el-form-item>
+                 </el-col>
+              </el-form-item>
+              <!-- 省份选择 -->
+              <el-form-item
+                label="所在地区："
+                prop="selectedOptions"
+                class="selectCity"
+                 >
+                <el-cascader
+                  size="small"
+                  :options="cityOptions"
+                  @change="changeProvince"
+                  change-on-select
+                  v-model="selectedOptions"
+                  ref = "cascader"
+                >
+                </el-cascader>
+              </el-form-item>
+              <!-- 详细地址 -->
+              <el-form-item label="详细地址："  prop="store_address">
+                <el-input
+                size="small"
+                v-model="form.store_address"
+                maxlength="80"
+                placeholder="请输入详细地址，如街道名称，门牌号等信息" 
+                auto-complete="off"
+                >
+                </el-input>
+              </el-form-item>
+              <!-- 网点照片 -->
+              <el-form-item label="网点照片：">
+                <el-upload
+                  action="pc_seller/pc_seller/images/ImgUploads"
+                  class="avatar-uploader"
+                  list-type="picture-card"
+                  :on-preview="handlePictureCardPreview"
+                  :http-request= "customUp"
+                  :on-remove="handleRemove"
+                  :before-upload="beforeAvatarUpload"
+                  :class="lengthNum==5?'hideImg':''"
+        
+                >
+                 <span class="blue font14">+添加图片</span>
+                </el-upload>
+                <el-dialog :visible.sync="dialogVisible">
+                  <img width="100%" :src="dialogImageUrl" alt="">
+                </el-dialog>
+              </el-form-item>
+              <!-- 是否营业 -->
+              <el-form-item    
+                label="是否营业：" 
+                prop="business_status"
+                >
+                <el-select 
+                v-model="form.business_status" 
+                placeholder="请选择"
+                @change="changeBusiness"
+                size="mini"
+                >
+                  <el-option
+                    v-for = "item in if_business"
+                    :key = "item.id"
+                    :label = "item.name"
+                    size="mini"
+                    :value = "item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <!-- 店铺介绍 -->
+              <el-form-item 
+                label="店铺介绍："
+                prop="recommend">
+                <el-input  
+                  type="textarea" v-model="form.recommend"
+                  maxlength="200"
+                  placeholder="简述网点的推荐商品或者活动，也可以向卖家陈述特殊服务，例如：免费WIFI和停车（最多200个字）"
+                  size="mini"
+                >
+                </el-input>
+              </el-form-item>
+              <!-- 网点类型 -->
+              <el-form-item 
+                label="网点类型："
+                prop="outlets_type">
+                <el-checkbox-group v-model="form.outlets_type" size="small">
+                  <el-checkbox-button 
+                    v-for="item in outletsTypes" 
+                    :label="item.id"  
+                    :key="item.id"
+                    :class="multipleSelection.indexOf(item.id)+1?'switch':''"
+                  >
+                    {{item.name}}
+                  </el-checkbox-button>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item>
+                <el-button size="small" type="primary">
+                  保存
+                </el-button>
+              </el-form-item>
+            </el-form>
+        </el-row>
+      </el-row>
+    </el-main>
+    
+  </el-container>
+</template>
+<script>
+import cityOptions from "utils/city_data2017_element.js";
+import {
+  outletsDetail,
+  outletsList,
+  saveOutlets,
+  deleteOutlets
+} from "api/shop/online";
+import { imgUploads } from "api/shop/authentication";
+export default {
+  data() {
+    return {
+      lengthNum: 0,
+      dialogVisible: false, //展示图片的
+      dialogImageUrl: "", //展示图片的链接
+      disabled: false, //是否隐藏添加图片的按钮
+      cityOptions, //引入省市区
+      addInlineChoice: true, // 切换到添加网点界面
+      choice: 1, //判断选择按钮
+      searchText: "", //搜索内容
+      multipleSelection: [], //复选框
+      selectedOptions: [], //省市区
+      outletsTypes: [
+        { id: 1, name: "线下门店" },
+        { id: 2, name: "买家自提点" }
+      ], //网点类型数据组合
+      if_business: [{ id: 1, name: "营业" }, { id: 2, name: "休息" }], //是否营业的内容
+      //提交线下网点的表单内容
+      form: {
+        outletsId: "", //网点id
+        store_name: "", //网点名称
+        store_address_bz: {
+          areaId: "",
+          areaName: "",
+          cityId: "",
+          cityName: "",
+          provinceId: "",
+          provinceName: ""
+        },
+        store_address: "", //详细地址
+        store_phone: "", //电话
+        store_images: [],
+        outlets_type: [],
+        business_status: "", //是否营业
+        recommend: "", // 商家简介
+        area_code: "", //区号
+        business_hours: [
+          {
+            open_time: "",
+            close_time: "",
+            week: []
+          }
+        ]
+      },
+      // table的详细数据
+      items: [
+        {
+          id: 0,
+          outlets_type: ["1"],
+          store_name: "",
+          store_address_bz: {
+            areaId: "",
+            areaName: "",
+            cityId: "",
+            cityName: "",
+            provinceId: "",
+            provinceName: ""
+          },
+          address: "",
+          img_ids: {
+            pic_path: "",
+            relative_path: "",
+            pic_thum: "",
+            relative_path_thum: ""
+          }
+        }
+      ],
+      rules: {} //验证规则
+    };
+  },
+  mounted() {},
+  created() {
+    this.reset();
+  },
+  methods: {
+    // 重置数据
+    reset() {
+      outletsList();
+    },
+    // 点击获取全部网点
+    allOnline() {
+      this.choice = 1;
+    },
+    // 点击获取线下网点
+    offlineOnline() {
+      this.choice = 2;
+    },
+    // 点击获取买家自提点
+    buyOnline() {
+      this.choice = 3;
+    },
+    // 复选框数据
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    // 设置省市区信息
+    changeProvince(value) {
+      this.form.store_address_bz.provinceId = this.$refs.cascader.currentValue[0];
+      this.form.store_address_bz.provinceName = this.$refs.cascader.currentLabels[0];
+      this.form.store_address_bz.cityId = this.$refs.cascader.currentValue[1];
+      this.form.store_address_bz.cityName = this.$refs.cascader.currentLabels[1];
+      this.form.store_address_bz.areaId = this.$refs.cascader.currentValue[2];
+      this.form.store_address_bz.areaName = this.$refs.cascader.currentLabels[2];
+    },
+    //是否营业的数据改变的时候
+    changeBusiness(value) {
+      console.log(value);
+      this.form.business_status = value;
+    },
+    // 上传图片之前
+    beforeAvatarUpload() {},
+    //上传图片
+    customUp(file) {
+      console.log(file);
+      const isJPG =
+        file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/jpg" ||
+        file.type === "image/gif";
+      const isLt2M = file.size / 1024 / 1024 < 4;
+      if (!isJPG) {
+        this.$message.error("请使用png/jpeg/gif/jpg格式的图片!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 4MB!");
+      }
+      return isJPG && isLt2M;
+    },
+    // 点击成功图片的时候
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    //删除图片
+    handleRemove(file, fileList) {
+      console.log(file);
+      console.log(fileList);
+    },
+    // 自定义上传
+    customUp(file) {
+      let reader = new FileReader();
+      reader.readAsDataURL(file.file);
+      reader.onload = () => {
+        this.imageUrl = reader.result;
+        imgUploads(1, reader.result).then(result => {
+          this.form.store_images.push({
+            relative_path: result.data.data.originImg,
+            relative_path_thum: result.data.data.thumImg
+          });
+          this.lengthNum = this.form.store_images.length;
+        });
+      };
+    }
+  }
+};
+</script>
+<style lang="stylus" scoped>
+#shopOfflineOnline
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px
+    .mainBody
+      width 100%
+      padding 20px 10px
+      min-height 750px
+      .shopHeader
+        padding-bottom 10px
+        .shopHeaderLeft
+          min-width 300px
+          .activeInput
+            background-color #1491f2
+          .choiceInput
+            padding 0 18px
+            line-height 32px
+            display inline-block
+            border-radius 4px
+        .shopHeaderRight
+          min-width 400px
+          text-align right
+          .el-input
+            width 220px
+      .el-form
+        width 450px
+        .el-button
+          width 250px
+        .el-checkbox-group
+          .el-checkbox-button
+            margin-right 20px
+            .el-checkbox-button__inner
+              border-radius 4px
+</style>
+
+<style>
+#shopOfflineOnline .el-checkbox-button .el-checkbox-button__inner {
+  border-radius: 4px;
+  border: 1px solid #dbdbdb;
+}
+#shopOfflineOnline .is-checked .el-checkbox-button__inner {
+  border: 1px solid #409eff;
+}
+#shopOfflineOnline .el-checkbox-button__inner:hover {
+  border: 1px solid #409eff;
+}
+#shopOfflineOnline .el-upload {
+  width: 90px;
+  height: 90px;
+  line-height: 90px;
+  border: 1px solid #cccccc;
+}
+#shopOfflineOnline .el-upload-list--picture-card .el-upload-list__item {
+  width: 90px;
+  height: 90px;
+}
+#shopOfflineOnline .hideImg .el-upload {
+  display: none;
+}
+</style>

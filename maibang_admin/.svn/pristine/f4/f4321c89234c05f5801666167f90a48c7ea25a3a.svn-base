@@ -1,0 +1,41 @@
+<template>
+    <div>
+        <div class="smallwebChat" v-if="$store.state.chat.isShowChat"  @click.stop="openChat">
+            <div class="logo"></div>
+            <p>通知中心</p>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    methods:{
+        openChat(){
+            this.$store.dispatch('openWebChat')
+        }
+    }
+}
+</script>
+
+<style scoped>
+ .smallwebChat{
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 150px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background: white;
+    padding: 0 10px;
+    cursor: pointer;
+}
+.smallwebChat .logo{
+    width:40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: black;
+    margin-right: 10px;
+}
+</style>

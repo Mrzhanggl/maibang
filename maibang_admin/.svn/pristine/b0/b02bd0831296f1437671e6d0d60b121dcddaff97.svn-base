@@ -1,0 +1,12 @@
+import request from "@/utils/request"
+
+
+
+// 获取订购服务信息
+export const getOrderService = () => {
+  return request({
+    url: '/pc_seller/orderService/getOrderService',
+
+    method: 'post'
+  })
+}

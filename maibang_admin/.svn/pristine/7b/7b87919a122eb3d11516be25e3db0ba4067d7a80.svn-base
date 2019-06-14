@@ -1,0 +1,131 @@
+<template>
+  <!-- 公众号 -->
+  <el-container id="shopPublic">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb>
+        
+        <el-breadcrumb-item>
+          微信公众号
+        </el-breadcrumb-item>
+        
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row type="flex" justify="space-between">
+        <el-row class="mainBody bgFFF">
+          <el-row type="flex" justify="space-between" v-if="if_modify">
+            <el-col :span="10" class="shopBinding">
+              <p class="colorGreen">绑定微信公众号，把店铺和微信打通</p>
+              <p>绑定后即可在这里管理你的公众号，汽配帮手提供比微信官方后台更强大的功能！</p>
+              <div>
+                <el-button type="success" @click="bindingPublic">我有微信公众号,立即设置</el-button>
+                 <el-button type="success" plain @click="sureModify">自定义菜单</el-button>
+              </div>
+            </el-col>
+            <el-col :span="6" class="font14 shopPrompt">
+              <p>温馨提示：</p>
+              <ul>
+                <li>
+                  一个公众号只能和一个店铺绑定
+                </li>
+                <li>
+                  为保证所有功能正常，授权时请保持默认选择，把权限统一授权给汽配帮手
+                </li>
+              </ul>
+            </el-col>
+          </el-row>
+          <el-row v-else class="customPublic">
+            <el-col class="customPublicHeader">
+              <p><i class="el-icon-warning blue
+"></i> 您的每次操作都会实时保存到当前页面以便预览，若要在公众号上生效，请修改点击“提交发布”</p>
+            </el-col>
+          </el-row>
+        </el-row>
+      </el-row>
+    </el-main>
+    
+  </el-container>
+</template>
+<script>
+import { menu } from "api/shop/public";
+export default {
+  data() {
+    return {
+      if_modify: true,
+      storeId: 0
+    };
+  },
+  created() {
+    this.initial();
+  },
+  mounted() {},
+
+  methods: {
+    // 初始化
+    initial() {
+      this.storeId = window.localStorage.getItem("storeId");
+      menu().then(res => {
+        console.log(res);
+      });
+    },
+    // 绑定公众号
+    bindingPublic() {
+      window.open(
+        `https://weixin.ymaibang.com/open/component_start_auth.php?merchant_id=${
+          this.storeId
+        }&auth_type=1`
+      );
+      this.$confirm("请在新窗口中完成微信公众号授权", "提示", {
+        cancelButtonText: "已成功设置",
+        confirmButtonText: "授权失败,重试"
+      })
+        .then(() => {
+          this.bindingPublic();
+        })
+        .catch(() => {});
+    },
+    // 自定义菜单
+    sureModify() {
+      menu().then(res => {
+        if (res.data.code == 400) {
+          this.if_modify = false;
+        } else if (res.data.code == 400) {
+          this.$message.error("请先绑定微信公众号");
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+#shopPublic
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px
+    .mainBody
+      width 100%
+      padding 50px 30px 100px 30px
+      min-height 750px
+      .shopPrompt
+        padding-top 50px
+        ul, li
+          list-style disc
+      .shopBinding
+        p:nth-of-type(2)
+          margin 30px 0
+      .customPublic
+        margin -40px -20px 0 -20px
+        .customPublicHeader
+          background-color #f5f5f5
+          padding 26px 40px
+          .el-icon-warning
+            font-size 50px
+            vertical-align middle
+</style>
+

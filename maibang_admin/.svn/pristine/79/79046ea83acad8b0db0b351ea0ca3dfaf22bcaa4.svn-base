@@ -1,0 +1,107 @@
+<template>
+    <div class="order">
+        <div class="order_item" v-for="(item,index) in orderList" :key="index">
+            <div class="order_item_header">
+                <span class="type">{{item.order_status_describe}}</span>
+                <span class="time">{{item.add_time}}</span>
+            </div>
+            <div class="order_item_content">
+                <img :src="item.pro_img">
+                <div class="order_data">
+                    <span class="name">{{item.user_name}}</span>
+                    <span class="code">订单号：{{item.order_num}}</span>
+                </div>
+            </div>
+        </div>
+          <!-- <p class="getMore">加载更多</p> -->
+          <!-- <p class="noMore" v-if="orderListLength < 10">没有更多内容</p> -->
+    </div>
+</template>
+<script>
+import { getOrderList } from "@/api/customer/order/order";
+export default {
+  data() {
+    return {
+      orderList: null,
+      page: 1,
+      total: null,
+      orderListLength: null
+    };
+  },
+  methods: {
+    //请求通知列表
+    getOrderListFn() {
+      let data = {
+        page: this.page
+      };
+      getOrderList(data).then(res => {
+        console.log(res);
+        this.orderList = res.data.data.orderMsgList;
+        console.log(this.orderList,"这是数据")
+        this.orderListLength = this.orderList.length
+        this.total = res.data.data.pageSum * 10 
+      });
+    }
+  },
+  mounted() {
+    this.getOrderListFn();
+  }
+};
+</script>
+<style scoped>
+.order{
+    padding: 10px;
+    cursor: default;
+    height: 100%;
+}
+.order_item{
+    background-color: #f2f2f2;
+	border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.order_item_header{
+    display: flex;
+    justify-content: space-between;
+    color: #2f2c2c;
+    font-size: 13px;
+}
+  .order_item_content img{
+      width: 50px;
+      height: 50px;
+  }
+  .type{
+      color: #1491f2;
+  }
+  .code{
+      color: #666666;
+      font-size: 12px;
+  }
+  .order_item_content{
+      display: flex;
+      justify-content: flex-start;
+      margin-top: 10px;
+  }
+  .order_data{
+      display: flex;
+      height: 50px;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #333333;
+      font-size: 14px;
+      margin-left: 10px;
+  }
+   .getMore{
+      color: #1491f2;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 15px;
+      cursor: pointer;
+  }
+  .noMore{
+       color: #1491f2;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 15px;
+  }
+</style>

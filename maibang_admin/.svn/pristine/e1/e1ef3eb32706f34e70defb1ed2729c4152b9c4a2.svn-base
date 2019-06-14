@@ -1,0 +1,305 @@
+<template>
+    <el-container class="applicableModels">
+        <el-header class="bgFFF">
+            <el-breadcrumb>
+                <el-breadcrumb-item>
+                    新增商品
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>
+                    适用车型
+                </el-breadcrumb-item>
+            </el-breadcrumb>
+        </el-header>
+
+        <el-main class="bgFFF">
+            <div class="top-header">
+                <ul>
+                    <li :class="{changeabc:changeabc==index}" @click="changeABC(index,value)" v-for="(value,index) in ABC" >{{value}}</li>
+                </ul>
+            </div>
+
+            <div class="main">
+                <div class="main-one">
+                    <ul>
+                        <li class="mainBrand">主营品牌
+                            <ul class="model">
+                                <li v-for="(value,index) in mainbrandlist" @click="Modellist(value.id,index)">{{value.name}}
+                                    <ul v-if="index==indexx">
+                                        <li v-for="(item,index) in modellists"@click.stop="getYourMoney(item.id)">{{item.name}}</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="ABCBrand" v-for="(value) in ABC" :id="value" :name='value'>{{value}}
+                            <ul class="ABCBrand-model">
+                                <li v-for="(item,index) in Brands" @click="Modellist(item.id,index+3)">{{item | myCurrency(value)}}
+                                    <ul v-if="index+3==indexx && value==item.pinyin_initial">
+                                        <li v-for="(list,index) in modellists" @click.stop="getYourMoney(list.id)">{{list.name}}</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="main-two">
+                    <input class="input fl" type="text" placeholder="未查到的数据，在这添加">
+                    <button class="btn fl">添加</button>
+                    <div class="main">
+                        <div class="left">
+                            <ul>
+                                <li :class="{yearLi:yearIndex==index}" v-for="(value,index) in getYearList" @click="caryearlist(value.year,index)">{{value.year}}</li>
+                            </ul>
+                        </div>
+                        <div class="right">
+                            <ul>
+                                <li v-for="(value,index) in YearParameterList" @click.stop="selectModel(index)">{{value.name}}
+                                    <i v-if="value.select" class="fr"><img src="@/assets/goods/yes.png" alt=""></i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="main-three">
+
+                </div>
+            </div>
+        </el-main>
+    </el-container>
+</template>
+
+<script>
+import {mainbrandlist,modellist,getbrand,getalistofyears,getYearParameterList} from '@/api/goods/goods'
+export default {
+    data () {
+        return {
+            ABC:['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+            changeabc:0,
+            mainbrandlist:[],   //主营品牌
+            modellists:[],   //车型列表
+            indexx:0,
+            Brands:[],//品牌,
+            getYearList:[],//年款列表
+            YearParameterList:[],//年款对象列表
+            carID:'',//车型id
+            yearIndex:-1,//年索引
+        };
+    },
+
+    components: {},
+
+    created(){
+        this.getData()
+    },
+    filters:{
+        myCurrency:function(myInput,arg1){
+           if(myInput.pinyin_initial == arg1){
+               return myInput.name
+           }
+        }
+    },
+    methods:{
+        getData(){
+            mainbrandlist().then(res=>{
+                this.mainbrandlist = res.data.data
+            })
+
+            let data = {
+                type:'brand'
+            }
+            getbrand(data).then(res=>{
+                this.Brands = res.data.data
+            })
+        },
+        changeABC(index,value){   //锚点的切换
+            this.changeabc=index
+            var obj = document.getElementById('main-one');
+            obj.scrollTop='100px'
+        },
+        Modellist(id,index){
+            this.indexx=index
+            let data = {
+                brandId:id
+            }
+            modellist(data).then(res=>{
+                this.modellists = res.data.data
+            })
+        },
+        getYourMoney(id){   //获取年款
+            this.carID = id
+            this.YearParameterList = []
+            let data = {
+                modelId:id
+            }
+
+            getalistofyears(data).then(res=>{
+                this.getYearList = res.data.data
+                this.caryearlist(res.data.data[0].year,0)
+            })
+        },
+        caryearlist(year,index){   //获取年款对象
+            this.yearIndex=index
+            let data = {
+                modelId:this.carID,
+                year:year
+            }
+            getYearParameterList(data).then(res=>{
+                this.YearParameterList = res.data.data
+            })
+        },
+        selectModel(index){  //选择车型
+            
+        },
+    },
+}
+
+</script>
+
+<style lang="stylus" scoped>
+    .applicableModels{
+        .el-header .el-breadcrumb{
+            line-height:60px
+        }
+        .el-main{
+            margin-top: 10px;
+            margin-left: 10px;
+            .top-header{
+                width:20%;
+                height:120px;
+                li{
+                    display inline-block
+                    width:23px;
+                    height:23px;
+                    border 1px solid #ccc;
+                    text-align center
+                    margin-right 5px
+                    margin-bottom 5px
+                }
+                .changeabc{
+                    background-color #1491f2
+                    color #fff
+                }
+            }
+            .main{
+                display flex
+                .main-one{
+                    width 18%
+                    height 800px
+                    border 1px solid #ccc
+                    overflow auto
+                    .mainBrand{
+                        background-color #cfbf51
+                        line-height 30px
+                        padding-left 10px
+                        .model{
+                            background-color #f2f2f2
+                            border-top 1px solid #cccccc
+                            border-bottom 1px solid #cccccc
+                            margin-left -10px
+                            padding-left 10px
+                            ul{
+                                background-color #fff
+                                margin-left -10px
+                                padding-left 10px
+                                li{
+                                    margin-left -10px
+                                    padding-left 20px
+                                }
+                                li:hover{
+                                    background-color #1491f2
+                                    color #fff
+                                    cursor pointer
+                                }
+                            }
+                        }
+                    }
+                    .ABCBrand{
+                        background-color #ccc
+                        line-height 30px
+                        padding-left 10px
+                        color #1491f2
+                        font-weight 900
+                        font-size 17px;
+                        border-bottom 1px solid #ccc
+                        .ABCBrand-model{
+                            fons 16px
+                            font-weight normal
+                            color #000
+                            li{
+                                background-color #f2f2f2
+                                margin-left -10px
+                                padding-left 10px
+                                ul li{
+                                    background-color #fff
+                                    margin-left -10px
+                                    padding-left 30px
+                                }
+                                li:hover{
+                                    background-color #1491f2
+                                    color #fff
+                                    cursor pointer
+                                }
+                            }
+                        }
+                    }
+                }
+                .main-two{
+                    width 35%
+                    height 800px
+                    margin-left 20px
+                    .input{
+                        width 85%
+                        height 30px
+                        border 1       
+                        outline none
+                        font-size 16px
+                        padding-left 5px      
+                        margin-bottom 10px           
+                    }
+                    .btn{
+                        width 15%
+                        height 30px
+                        padding 0
+                        background-color #1491f2
+                        color #fff
+                        border 1px solid #1491f2
+                    }
+                    .main{
+                        width 100%
+                        height 770px
+                        overflow auto
+                        .left{
+                            width 50px
+                            li{
+                                width 100%
+                                height 30px
+                                text-align center
+                                line-height 30px
+                                border 1px solid #ccc
+                                cursor pointer
+                            }
+                            .yearLi{
+                                background-color #1491f2
+                                color #fff
+                            }
+                        }
+                        .right{
+                            width 90%
+                            margin-left 10px
+                            li{
+                                border-bottom 1px solid #ccc
+                                height 30px
+                                line-height 30px
+                                cursor pointer
+                            }
+                            .el-button{
+                                margin-top 10px
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+</style>

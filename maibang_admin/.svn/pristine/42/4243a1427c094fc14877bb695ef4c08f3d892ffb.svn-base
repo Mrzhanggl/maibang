@@ -1,0 +1,177 @@
+<template>
+    <div class="chat">
+        <div class="chat_content" v-if="$store.state.chat.isShowChat" v-drag :style="{position:'fixed',
+        width:'300px',
+        height:'570px',
+        bottom:0,
+        right:0,
+        cursor: 'move' ,
+        background:'white'}">
+      <div class="chat_header">
+          <div class="chat_user">
+              <img :src="userImg">
+              <p>{{userName}}</p>
+          </div>
+          <span class="el-icon-close" @click.stop="closeWebchat"></span>
+      </div>
+      <div class="chat_container" @mousedown.stop="stopDown">
+           <div class="chat_nav">
+             <div  :class="{active: active == 'message'}" @click="active = 'message'">
+               <el-badge :value="noReadNum" class="item">
+               <span >
+                   <img src="../../images/chat/xinxi.png">
+               </span>
+               </el-badge>
+             </div>
+             <div   :class="{active: active == 'order'}" @click="active = 'order'">
+               <el-badge :value="12" class="item">
+              <span>
+                   <img src="../../images/chat/dingdan.png">
+               </span>
+               </el-badge>
+             </div>
+             <div  :class="{active: active == 'notice'}" @click="active = 'notice'">
+               <el-badge :value="12" class="item">
+               <span>
+                   <img src="../../images/chat/tongzhi.png">
+               </span>
+               </el-badge>
+             </div>
+           </div>
+           <div class="chat_item">
+              <keep-alive><message v-if="active == 'message'"></message></keep-alive>
+              <keep-alive><order-message v-if="active == 'order'"></order-message></keep-alive>
+               <keep-alive><notice v-if="active == 'notice'"></notice></keep-alive>
+           </div>
+      </div>
+        </div>
+    </div>
+</template>
+<script>
+import message from "./message";
+import orderMessage from "./orderMessage";
+import notice from "./notice";
+export default {
+  data() {
+    return {
+      active: "message",
+      userImg: localStorage.getItem("userAvatar"),
+      userName: localStorage.getItem("userName"),
+      noReadNum: null
+    };
+  },
+  components: {
+    message,
+    orderMessage,
+    notice
+  },
+  directives: {
+    drag: function(box) {
+      console.log(box);
+      box.onmousedown = function(ev) {
+        console.log("按下");
+        var disX = ev.clientX - box.offsetLeft;
+        var disY = ev.clientY - box.offsetTop;
+        document.onmousemove = function(ev) {
+          console.log("开始移动");
+          var l = ev.clientX - disX;
+          var t = ev.clientY - disY;
+          box.style.left = l + "px";
+          box.style.top = t + "px";
+          console.log(document.body.clientHeight);
+          console.log(parseInt(box.style.left) + 300, "这是box");
+          if (parseInt(box.style.left) + 300 >= document.body.clientWidth) {
+            box.style.left = document.body.clientWidth - 300 + "px";
+          }
+          if (parseInt(box.style.left) <= 0) {
+            box.style.left = 0 + "px";
+          }
+          if (parseInt(box.style.top) + 570 >= document.body.clientHeight) {
+            box.style.top = document.body.clientHeight - 570 + "px";
+          }
+        };
+        document.onmouseup = function() {
+          console.log("松开");
+          document.onmousemove = null;
+          document.onmouseup = null;
+        };
+      };
+    }
+  },
+  methods: {
+    stopDown() {},
+    closeWebchat() {
+      this.$store.dispatch("closeWebChat");
+    }
+  },
+  mounted() {
+    if(sessionStorage.getItem('notReadSum')){
+       this.noReadNum = sessionStorage.getItem('notReadSum') 
+    }else{
+       this.noReadNum = null
+    }
+  }
+};
+</script>
+
+
+<style scoped>
+.chat_content {
+  box-shadow: -7px -5px 9px 0px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.chat_header {
+  width: 300px;
+  height: 80px;
+  background-color: #cccccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+}
+.chat_header span {
+  font-size: 20px;
+  color: black;
+  font-weight: 500;
+  cursor: pointer;
+}
+.chat_user {
+  display: flex;
+  align-items: center;
+}
+.chat_user img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 10px;
+}
+.chat_nav {
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 30px;
+  color: #666666;
+  background: #cccccc;
+}
+.chat_nav div{
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  height: 40px;
+}
+.chat_nav .active {
+  border-bottom: 3px solid #1491f2;
+}
+.chat_item {
+  height: 450px;
+}
+.chat>>>.el-badge__content{
+  border:0px !important;
+}
+</style>

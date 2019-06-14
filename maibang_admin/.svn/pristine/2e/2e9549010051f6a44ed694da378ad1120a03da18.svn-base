@@ -1,0 +1,614 @@
+<template>
+    <el-container id="setbulletinsetting">
+    <el-header class="bgFFF">
+     <el-breadcrumb>
+        <el-breadcrumb-item>
+         智能查询
+        </el-breadcrumb-item>        
+      </el-breadcrumb>
+    </el-header>
+    <el-main>
+        <!--智能查询-->
+        <div class="seven" >
+            <div>
+                <div @click="folda" >
+                    <span>车型</span>
+                    <i></i>
+                </div>
+                
+                <div class="bt jia"  @click="dialogVisible=true,getcarlist()">
+                    <img src="../../images/setImg/whitejia.png" alt="">
+                </div>
+                
+            </div>
+            <div  :class="{'show':showa}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="foldb" >
+                    <span>配件</span>
+                    <i></i>
+                </div>
+                
+            </div>
+            <div  :class="{'show':showb}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="foldc" >
+                    <span>编码</span>
+                    <i></i>
+                </div>
+                
+            </div>
+            <div  :class="{'show':showc}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="foldd" >
+                    <span>FMSI</span>
+                    <i></i>
+                </div>
+                <el-switch
+                @change="change($event,'fmsi_search')"
+                class="bt"
+                v-model="fmsi_search"
+                active-color="#13ce66"
+                inactive-color="#ff4949">
+                </el-switch>
+            </div>
+            <div  :class="{'show':showd}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="folde" >
+                    <span>VIN</span>
+                    <i></i>
+                </div>
+                <el-switch
+                @change="change($event,'vin_search')"
+                class="bt"
+                v-model="vin_search"
+                active-color="#13ce66"
+                inactive-color="#ff4949">
+                </el-switch>
+            </div>
+            <div  :class="{'show':showe}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="foldf" >
+                    <span>发动机</span>
+                    <i></i>
+                </div>
+                <el-switch
+                @change="change($event,'engine_search')"
+                class="bt"
+                v-model="engine_search"
+                active-color="#13ce66"
+                inactive-color="#ff4949">
+                </el-switch>
+            </div>
+            <div  :class="{'show':showf}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="foldg" >
+                    <span>变速器</span>
+                    <i></i>
+                </div>
+                <el-switch
+                @change="change($event,'gearbox_search')"
+                class="bt"
+                v-model="gearbox_search"
+                active-color="#13ce66"
+                inactive-color="#ff4949">
+                </el-switch>
+            </div>
+            <div  :class="{'show':showg}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <div class="seven" >
+            <div>
+                <div @click="foldh" >
+                    <span>OEM</span>
+                    <i></i>
+                </div>
+                <el-switch
+                @change="change($event,'oem_search')"
+                class="bt"
+                v-model="oem_search"
+                active-color="#13ce66"
+                inactive-color="#ff4949">
+                </el-switch>
+            </div>
+            <div  :class="{'show':showh}">
+                <p>可以根据车型来搜索商品，支持自己的选择。可以根据车型来搜索商品，支持自己的选择</p>
+            </div>
+        </div>
+
+        <!-- 弹窗 -->
+        <el-dialog
+                    width="480px"
+                    height="588px"
+                    title="选择主管品牌"
+                    :show-close="false"
+                    :visible.sync="dialogVisible"
+                    >
+                    <div slot="title" class="dialoghead">
+                        <h3>选择主管品牌</h3>
+                        <h4>已选择个品牌</h4>
+                        <span @click="selectedall">全选</span>
+                    </div>
+                    
+                    <ul class="dialogmain">
+                        <li v-for="(item,index) in brand_list" :key="index" :class="{selected:item.isSelect} " @click="selectchange(index,item.id)">
+                           <div>
+                               <img :src="item.logo" alt="">
+                            </div> 
+                            <span :class="{selected:item.isSelect}">
+                                {{item.name}}
+                            </span>
+                        </li>
+                        
+                        
+                    </ul>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="dialogVisible = false,resetselect"  >取 消</el-button>
+                        <el-button type="primary" @click="dialogVisible = false;selectedsub()">确 定</el-button>
+                    </span>
+        </el-dialog>
+        
+    </el-main>
+    </el-container>
+</template>
+
+<script>
+import {intelligenceSearchType,saveIntelligenceSearchType,majorBrand,saveMajorBrand} from "@/api/set/setmanage"
+
+export default {
+    data () {
+         return {
+             selectlist:[],             //已选品牌
+             brand_list:[],           //获取品牌
+             dialogVisible:false,   //车型选择弹窗
+             oem_search:false,      //oem开关
+             fmsi_search:false,      //FMISa开关
+             vin_search:false,        //VIN开关
+             engine_search:false,       //发动机开关
+             gearbox_search:false,      //变速箱开关
+             showa:false,
+             showb:false,
+             showc:false,
+             showd:false,
+             showe:false,
+             showf:false,
+             showg:false,
+             showh:false,
+             
+         };
+    },
+
+    components: {},
+
+    created(){},
+
+    watch:{
+        
+    },
+
+    mounted(){
+        this.getbtn()
+    },
+    methods:{
+        //提交选择品牌
+        selectedsub(){
+            if(this.selectlist.length==this.brand_list.length){
+                let data={
+                    "type": 2,
+                }
+                saveMajorBrand(data).then((res)=>{
+                    if(res.data.code==400){
+                        this.$message.success('保存成功')
+                    }else{
+                        this.$message.error("保存失败")
+                    }
+                },err=>{
+                        this.$message.error(err)
+                    }
+                )
+            }else{
+                let data={
+                    "type": 2,
+                    "brand_list":this.selectlist
+                }
+                saveMajorBrand(data).then((res)=>{
+                    if(res.data.code==400){
+                        this.$message.success('保存成功')
+                    }else{
+                        this.$message.error("保存失败")
+                    }
+                },err=>{
+                        this.$message.error(err)
+                    }
+                )
+
+            }
+        },
+        //全选
+        selectedall(){
+            if(this.selectlist.length!=this.brand_list.length){
+                this.selectlist=[]
+                this.brand_list.forEach((el)=>{
+                    el.isSelect=true
+                    this.selectlist.push(el.id)
+                })
+                
+            }else{
+                 this.selectlist=[]
+                  this.brand_list.forEach((el)=>{
+                    el.isSelect=false
+                })
+            }
+            console.log("全选功能的已选择列表",this.selectlist)
+        },
+
+        //选择品牌
+        selectchange(index,id){
+            this.brand_list[index].isSelect = !this.brand_list[index].isSelect
+            if(this.selectlist.indexOf(id)==-1){
+                this.selectlist.push(id)
+            }else{
+                this.selectlist.splice(this.selectlist.indexOf(id),1)
+            }
+            console.log("这是已选择的品牌id数组",this.selectlist)
+        },
+        // 获取主营品牌列表
+        getcarlist(){
+            majorBrand().then((res)=>{
+                if(res.data.code==200){
+                    console.log("车型列表拿到了",res)
+                    this.brand_list=res.data.data.brand_list
+                    this.selectlist=[]
+                    res.data.data.brand_list.forEach(element => {
+                        if(element.isSelect){
+                            this.selectlist.push(element.id)
+                            
+                        }
+                    });
+                    
+                }
+                else{
+                    this.$message.error("获取出错")
+                }
+                   
+            },
+            err=>{
+                this.$message.error(err)
+            }
+            )
+        },
+        //设置开关
+        change($event,t){
+            if($event){
+                let data={
+                    "type": t,
+                    "switch": 1, 
+                }
+                saveIntelligenceSearchType(data).then((res)=>{
+                    if(res.data.code==200){
+                        switch(t){
+                            case 'oem_search':
+                            this.$message.success('OEM查询已开启')
+                            break;
+                            case 'fmsi_search':
+                            this.$message.success('FMSI查询已开启')
+                            break;
+                            case 'vin_search':
+                            this.$message.success('VIN查询已开启')
+                            break;
+                            case 'engine_search':
+                            this.$message.success('发动机查询已开启')
+                            break;
+                            case 'gearbox_search':
+                            this.$message.success('变速器查询已开启')
+                            break;
+                        }
+                        
+                    }
+                        else if(res.data.code==400){
+                        this.$message.error('开启失败');
+                    }
+                    },err =>{
+                        this.$message.error(err)
+
+                })
+            }else{
+                let data={
+                    "type": t,
+                    "switch": 2, 
+                }
+                saveIntelligenceSearchType(data).then((res)=>{
+                    if(res.data.code==200){
+                        switch(t){
+                            case 'oem_search':
+                            this.$message.error('OEM查询已关闭')
+                            break;
+                            case 'fmsi_search':
+                            this.$message.error('FMSI查询已开启')
+                            break;
+                            case 'vin_search':
+                            this.$message.error('VIN查询已开启')
+                            break;
+                            case 'engine_search':
+                            this.$message.error('发动机查询已开启')
+                            break;
+                            case 'gearbox_search':
+                            this.$message.error('变速器查询已开启')
+                            break;
+                        }
+                    }
+                        else if(res.data.code==400){
+                        this.$message.error('关闭失败');
+                    }
+                    },err =>{
+                        this.$message.error(err)
+
+                })
+            }
+        },
+        //获取开关状态
+        getbtn(){
+            intelligenceSearchType().then(res =>{                
+                if(res.data.code==200){
+                    console.log("获取开关状态",res) 
+                    res.data.data.oem_search==1?this.oem_search=true:this.oem_search=false;
+                    res.data.data.fmsi_search==1?this.fmsi_search=true:this.fmsi_search=false;
+                    res.data.data.vin_search==1?this.vin_search=true:this.vin_search=false;
+                    res.data.data.engine_search==1?this.engine_search=true:this.engine_search=false;
+                    res.data.data.gearbox_search==1?this.gearbox_search=true:this.gearbox_search=false;
+
+                }
+                else if(res.data.code==400){
+                    this.$message.error('报错了');
+                }
+                }
+                ,err =>{
+                    this.$message.error(err)
+                })
+        },
+        
+
+        // 折叠
+        folda(){
+            if(this.showa){
+                this.showa=false;
+            }else{
+               this.showa=true;
+            }
+        },
+        foldb(){
+            if(this.showb){
+                this.showb=false;
+            }else{
+               this.showb=true;
+            }
+        },
+        foldc(){
+            if(this.showc){
+                this.showc=false;
+            }else{
+               this.showc=true;
+            }
+        },
+
+        foldd(){
+            if(this.showd){
+                this.showd=false;
+            }else{
+               this.showd=true;
+            }
+        },
+        folde(){
+            if(this.showe){
+                this.showe=false;
+            }else{
+               this.showe=true;
+            }
+        },
+        foldf(){
+            if(this.showf){
+                this.showf=false;
+            }else{
+               this.showf=true;
+            }
+        },
+        foldg(){
+            if(this.showg){
+                this.showg=false;
+            }else{
+               this.showg=true;
+            }
+        },
+        foldh(){
+            if(this.showh){
+                this.showh=false;
+            }else{
+               this.showh=true;
+            }
+        }
+    },
+}
+
+</script>
+<style>
+.dialoghead{
+    position: relative;
+}
+.dialoghead>h3{
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+}
+.dialoghead>h4{
+    font-size: 14px;
+    color: #999999;
+    font-weight: normal;
+    text-align: center;
+}
+.dialoghead>span{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    color: #1491f2;
+    cursor: pointer;
+
+}
+.el-dialog__body{
+    padding: 20px 0;
+}
+.dialogmain{
+    padding: 20px;
+    overflow-y: scroll;
+    height: 436px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+.dialogmain>li{
+    width: 200px;
+    height: 50px;
+    display: inline-block;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+.dialogmain>li>div{
+    width: 30px;
+    height: 30px;
+    margin-top: 10px;
+    margin-left: 10px;
+    display: inline-block;
+}
+.dialogmain>li>div>img{
+    width: 100%;
+    height: 100%;
+
+}
+.dialogmain>li>span{
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
+    color: #333;
+    font-size: 16px;
+     margin-top: 10px;
+     vertical-align: top;
+}
+.dialogmain .selected{
+    background-color: #1491f2;
+    color: white;
+}
+.seven{
+    width: 100%;
+    background-color: #f8f8f8;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+}
+.seven>div:first-of-type>div:first-of-type{
+    display: inline-block;
+    width: 100%;
+    cursor: pointer;
+}
+.seven>div:first-of-type>.bt{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+}
+.jia{
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}
+.jia>img{
+    height: 100%;
+    width: 100%;
+}
+.seven>div:first-of-type{
+     height: 60px;
+     position: relative;
+}
+.seven>div:last-of-type{
+    border-top: 1px solid #cccccc;
+    height: 80px;
+     background-color: white;
+     display: none;
+     transition: all 1s;
+}
+.seven>.show{
+    display: block!important;
+}
+.seven>div:last-of-type>p{
+    height: 100%;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 16px 20px;
+   overflow: hidden;
+}
+.seven>div:first-of-type>div:first-of-type>span{
+    display: inline-block;
+    height: 58px;
+    line-height: 58px;
+    margin-left: 9px;
+    font-size: 18px;
+    font-weight: bold;
+    
+}
+.seven i{
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-top: 10px solid #999;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+}
+
+
+</style>
+
+<style lang="stylus" scoped>
+#setbulletinsetting
+    .el-header
+        margin-left: 1px;
+    .el-breadcrumb
+        line-height: 60px;
+    .el-main
+        height: 100vh;
+        margin-top: 10px;
+        margin-left: 10px;
+        background-color: #FFF;
+        // display: flex;
+        // justify-content center
+        // align-items: center;
+    
+</style>

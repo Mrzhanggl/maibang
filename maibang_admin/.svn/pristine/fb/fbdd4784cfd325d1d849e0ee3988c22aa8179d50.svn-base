@@ -1,0 +1,42 @@
+import request from '@/utils/request'
+
+export function getChatList(params) {
+    params = {
+        ...params
+    }
+    return request({
+        url: "pc_seller/chat/messageList",
+        method: "get",
+        params
+    })
+}
+
+export function getchatRecord(data) { //获取置顶消息
+    return request({
+        url: "pc_seller/chat/chatRecord",
+        method: 'post',
+        data: {
+            ...data
+        }
+    })
+}
+
+export function setTop(data) { //获取置顶消息
+    return request({
+        url: "pc_seller/chat/setTop",
+        method: 'post',
+        data: {
+            ...data
+        }
+    })
+}
+
+export function deleteMessageList(data) { //获取置顶消息
+    return request({
+        url: "pc_seller/chat/deleteMessageList",
+        method: 'post',
+        data: {
+            ...data
+        }
+    })
+}

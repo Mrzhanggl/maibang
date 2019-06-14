@@ -1,0 +1,10 @@
+export default {
+  state: {
+    change: false
+  },
+  mutations: {
+    switch_change(state) {
+      state.change = state.change ? false : true;
+    }
+  }
+};

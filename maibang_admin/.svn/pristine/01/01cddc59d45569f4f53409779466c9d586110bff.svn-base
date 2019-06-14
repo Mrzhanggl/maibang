@@ -1,0 +1,21 @@
+<template>
+    <div class="recordImg">
+       {{img}}
+    </div>
+</template>
+
+<script>
+export default {
+    data(){
+        return{
+
+        }
+    },
+    watch:{
+        img(){
+            console.log("you")
+        }
+    },
+    props:["img"],
+}
+</script>

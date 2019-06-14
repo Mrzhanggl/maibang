@@ -1,0 +1,217 @@
+<template>
+    <el-container class="productpreview">
+        <el-main>
+            <div class="out-box">
+                <div class="box">
+                    <div class="header-top">
+                        <span>返回</span>
+                        <span>商品详情</span>
+                        <span>...</span>
+                    </div>
+
+                    <div class="celimg">
+                        <div class="block">
+                            <el-carousel height="150px">
+                            <el-carousel-item v-for="item in 4" :key="item">
+                                <img width="100%" height="100%" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528351154700&di=f06ddf68a9a544a2f23222ee24875953&imgtype=0&src=http%3A%2F%2Fpic29.nipic.com%2F20130524%2F12244143_142553084342_2.jpg" alt="">
+                            </el-carousel-item>
+                            </el-carousel>
+                        </div>
+                    </div>
+
+                    <div class="information">
+                        <p>展示的火花塞</p>
+                        <p class="red">￥100.00</p>
+                        <p><span class="right">库存：321</span><span>品牌编码:54475</span></p>
+                    </div>
+
+                    <div class="commodityNum">
+                        <div class="sellNum">
+                            选择数量：一盒4个  数量：1
+                        </div>
+                        <div class="extent">
+                            选择数量：一盒4个  数量：1
+                        </div>
+                    </div>
+
+                    <div class="company">
+                        <div class="company-x">
+                            <img :src="logo" alt="">
+                            <span class="fl">{{txt}}</span>
+                            <span class="right">进店逛逛</span>
+                        </div>
+                        <div class="enterprise-Certification">
+                            <span> <img src="@/assets/goods/yesyuan.png" alt="" width="15" height="15">企业认证</span>
+                        </div>
+                    </div>
+
+                    <div class="Details">
+                        <img src="@/assets/goods/xq.png" alt="">
+                    </div>
+
+                    <div class="imgList">
+                        <img v-for="value in 5" width="100%" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1528351154700&di=f06ddf68a9a544a2f23222ee24875953&imgtype=0&src=http%3A%2F%2Fpic29.nipic.com%2F20130524%2F12244143_142553084342_2.jpg" alt="">
+                    </div>
+                </div>
+            </div>
+        </el-main>        
+    </el-container>
+</template>
+
+<script>
+import {getMerchantInfo} from "@/api/goods/goods"
+export default {
+    data () {
+        return {
+            logo:'',
+            txt:''
+        };
+    },
+
+    components: {},
+    created(){
+        this.getdata()
+    },
+    methods:{
+        getdata(){
+            getMerchantInfo().then(res=>{
+                this.logo = res.data.data.store_msg.merchant_logo
+                this.txt = res.data.data.store_msg.shop_name
+            })
+        }
+    },
+}
+
+</script>
+<style lang="stylus" scoped>
+    .productpreview{
+        .out-box{
+            width 560px
+            padding 7px
+            background-color #f2f2f2
+            margin 0 auto
+        }
+        .el-main{
+            padding 0
+            background-color #fff
+            padding 50px
+            .box{
+                width 545px
+                .header-top{
+                    padding 0 10px
+                    background-color #000
+                    width 100%
+                    height 40px
+                    color #ffffff
+                    line-height 40px
+                    display flex
+                    justify-content space-between
+                }
+                .celimg{
+                    width 100%
+                    height 350px
+                    background-color pink
+                    .el-carousel{
+                        height 350px
+                    }
+                }
+                .information{
+                    width 100%
+                    height 120px
+                    background-color #fff
+                    margin-top 10px
+                    padding-top 5px
+                    padding-left 10px
+                    p{
+                        margin 12px 0
+                        span{
+                            color #999999
+                        }
+                        .right{
+                            margin-right 30px
+                        }
+                    }
+                    .red{
+                        color red
+                    }
+                }
+                .commodityNum{
+                    padding 0 5px
+                    margin-top 10px
+                    background-color #fff
+                    .sellNum{
+                        height 40px
+                        line-height 40px
+                    }
+                    .extent{
+                        height 40px
+                        line-height 40px
+                        border-top 1px solid #ccc
+                    }
+                }
+                .company{
+                    width 100%
+                    height 95px
+                    background-color #fff
+                    margin-top 10px
+                    padding 0 10px
+                    .company-x{
+                        position relative
+                        height 45px
+                        padding-top 10px
+                        border-bottom 1px solid #ccc
+                        img{
+                            width 30px
+                            height 30px
+                            border-radius 50%
+                            margin-right 70px
+                            float left
+                        }
+                        .right{
+                            right 0
+                            position absolute
+                        }
+                    }
+                    .enterprise-Certification{
+                        height 40px
+                        line-height 40px
+                        img{
+                            margin-right 10px
+                        }
+                    }
+                }
+                .Details{
+                    margin-top 20px
+                    text-align center
+                    height 70px
+                }
+                .imgList{
+                    img{
+                        margin-bottom 5px
+                    }
+                }
+            }
+        }
+        .el-carousel__item h3 {
+            color: #475669;
+            font-size: 14px;
+            opacity: 0.75;
+            line-height: 150px;
+            margin: 0;
+        }
+
+        .el-carousel__item:nth-child(2n) {
+            background-color: #99a9bf;
+        }
+        
+        .el-carousel__item:nth-child(2n+1) {
+            background-color: #d3dce6;
+        }
+    }
+</style>
+
+<style>
+    .productpreview .el-carousel__container{
+        height:350px!important;
+    }
+</style>

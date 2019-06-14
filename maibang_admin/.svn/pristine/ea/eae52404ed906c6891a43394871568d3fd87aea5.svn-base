@@ -1,0 +1,316 @@
+<template>
+ <!-- 店铺概况 -->
+ <el-container id="shopProfile">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb>
+     
+        <el-breadcrumb-item>
+          店铺概况
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row type="flex" justify="space-between">
+        <el-row class="mainBody bgFFF ">
+          <el-col :span="24" class="shopProfileInfo bgImg" :style="'backgroundImage:url('+$store.state.homeInfo.merchantInfo.merchant_logo+')'">
+            <div>
+              <p>
+                <span class="font20 fontWeight">
+                  {{$store.state.homeInfo.merchantInfo.shop_name}}
+                </span>
+                <span class="font14 colorFFF" v-show="$store.state.homeInfo.secured_transaction==1">
+                  汽配帮手担保
+                </span>
+              </p>
+              <p class="shopProfileInfoState">
+                <span class="smallLabel">
+                  <i class="el-icon-circle-check-outline" 
+                  :class="$store.state.homeInfo.certification.status == 2? 'colorGreen' :''"
+                  circle></i>
+                  <span v-if="$store.state.homeInfo.certification.type ==1" >个人认证</span> 
+                  <span v-else >企业认证</span>
+                </span>
+                <span  class="smallLabel">
+                  <i class="el-icon-circle-check-outline"
+                  :class="$store.state.homeInfo.secured_transaction==1?'colorGreen':''" 
+                  circle></i>
+                  担保交易
+                </span >
+                <span  class="smallLabel">
+                  <i class="el-icon-circle-check-outline" :class="$store.state.homeInfo.merchantInfo.isOutlets ?'colorGreen':''" circle></i>
+                  <span >线下门店</span>
+                </span>
+              </p>
+            </div>
+          </el-col>
+          <el-col :span="24" class="shopProfileYesterday textCen">
+            <el-row type="flex" justify="space-around">
+              <el-col :span="5">
+                <p><span class="blue font20">{{yesterdaySalesData.nowSales}}</span></p>
+                <p class="font14">
+                  昨日销售额
+                </p>
+              </el-col>
+              <el-col :span="5">
+                <p><span class="blue font20">{{yesterdaySalesData.nowInteractive}}</span></p>
+                <p class="font14">
+                  昨日浏览量
+                </p>
+              </el-col>
+              <el-col :span="5">
+                <p><span class="blue font20">{{yesterdaySalesData.nowOrderVolume}}</span></p>
+                <p class="font14">
+                  昨日订单量
+                </p>
+              </el-col>
+              <el-col :span="5">
+                <p><span class="blue font20">{{yesterdaySalesData.nowSalesVolume}}</span></p>
+                <p class="font14">
+                  昨日销售量
+                </p>
+              </el-col>
+            </el-row>
+          </el-col>
+          <el-col class="filterDate">
+            <div>
+              <span>筛选日期:</span>
+              <el-date-picker
+                v-model="selectMonth"
+                type="month"
+                @change = "monthChange"
+                placeholder="选择对应月份">
+              </el-date-picker>
+            </div>
+            <div class="filterDateButton">
+              <el-button type="primary" size="small" @click="screenMonth">筛选</el-button>
+            </div>
+          </el-col>
+          <el-col class="charts">
+            <div id="myHomeChart" style="width:100%;height:750px;"></div>
+          </el-col>
+        </el-row>
+      
+      </el-row>
+    </el-main>
+
+  </el-container>
+</template>
+<script>
+// 引入基本模板
+let echarts = require("echarts/lib/echarts");
+// 引入柱状图组件
+require("echarts/lib/chart/line");
+// 引入提示框和title组件
+require("echarts/lib/component/tooltip");
+require("echarts/lib/component/title");
+// 引入图例组件
+require("echarts/lib/component/legend");
+import {
+  enterprisehomes,
+  storeStatistics,
+  storeHome,
+  getMerchantInfo
+} from "api/shop/profile";
+export default {
+  data() {
+    return {
+      selectMonth: "",
+      certification: {
+        type: 1,
+        status: 1
+      },
+
+      selectDate: "",
+      year: "",
+      month: "",
+      abscissas: [],
+      salesVolume: [],
+      sales: [],
+      orderVolume: [],
+      pageView: [],
+      yesterdaySalesData: {
+        nowSalesVolume: 0,
+        nowSales: 0,
+        nowOrderVolume: 0,
+        nowInteractive: 0
+      }
+    };
+  },
+  created() {
+    enterprisehomes().then(result => {
+      this.yesterdaySalesData.nowSalesVolume =
+        result.data.data.yesterdaySalesData.nowSalesVolume;
+      this.yesterdaySalesData.nowSales =
+        result.data.data.yesterdaySalesData.nowSales;
+      this.yesterdaySalesData.nowOrderVolume =
+        result.data.data.yesterdaySalesData.nowOrderVolume;
+      this.yesterdaySalesData.nowInteractive =
+        result.data.data.yesterdaySalesData.nowInteractive;
+    });
+    storeHome().then(result => {
+      this.$store.commit("change_home_info", {
+        merchantInfo: result.data.data.merchantInfo,
+        certification: result.data.data.certification
+      });
+    });
+    getMerchantInfo().then(result => {
+      this.$store.commit("change_home_info", {
+        offline_store: result.data.data.offline_store,
+        secured_transaction: result.data.data.secured_transaction
+      });
+    });
+  },
+  mounted() {
+    let date = new Date();
+    this.year = date.getFullYear();
+    this.month = date.getMonth() + 1;
+    this.implement();
+  },
+  methods: {
+    // 执行
+    implement() {
+      storeStatistics(this.year, this.month).then(result => {
+        this.abscissas = result.data.data.abscissas;
+        this.salesVolume = result.data.data.salesVolume;
+        this.sales = result.data.data.sales;
+        this.orderVolume = result.data.data.orderVolume;
+        this.pageView = result.data.data.pageView;
+
+        this.myHomeChart();
+      });
+    },
+    // 改变日期之后
+    monthChange(date) {
+      this.selectDate = date;
+    },
+    // 选择筛选之后
+    screenMonth() {
+      if (this.selectMonth) {
+        this.year = this.selectDate.getFullYear();
+        this.month = this.selectDate.getMonth() + 1;
+        this.implement();
+      }
+    },
+
+    // 开始画布
+    myHomeChart() {
+      let myChart = echarts.init(document.getElementById("myHomeChart"));
+      let text = this.year + "年" + this.month + "月流量/销售趋势";
+      myChart.setOption({
+        title: { text: text },
+        tooltip: { trigger: "axis" },
+        legend: {
+          data: ["销售额", "浏览量", "订单量", "销售量"]
+        },
+        grid: {
+          left: "3%",
+          right: "3%",
+          bottom: "3%",
+          containLabel: true
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
+        xAxis: {
+          data: this.abscissas
+        },
+        yAxis: {
+          type: "value"
+        },
+        series: [
+          {
+            name: "销售额",
+            type: "line",
+            smooth: true,
+            itemStyle: {
+              color: "#1491f2"
+            },
+            data: this.sales
+          },
+          {
+            name: "浏览量",
+            type: "line",
+            smooth: true,
+            itemStyle: {
+              color: "#ff9626"
+            },
+            data: this.pageView
+          },
+          {
+            name: "订单量",
+            type: "line",
+            smooth: true,
+            itemStyle: {
+              color: "#86db48"
+            },
+            data: this.orderVolume
+          },
+          {
+            name: "销售量",
+            type: "line",
+            smooth: true,
+            itemStyle: {
+              color: "#ea2000"
+            },
+            data: this.salesVolume
+          }
+        ]
+      });
+    }
+  }
+};
+</script>
+<style lang="stylus" scoped>
+#shopProfile
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px 0 0 10px
+    .mainBody
+      width 100%
+      margin-right 0px
+      padding 20px 10px 0 10px
+      min-height 750px
+      .shopProfileInfo
+        height 60px
+        margin-left 10px
+        padding-left 80px
+        background-size 60px auto
+        background-position center left
+        >div
+          margin-top -6px
+          .fontWeight
+            vertical-align middle
+          .colorFFF
+            background-color #3cb034
+            padding 0 10px
+            border-radius 4px
+            vertical-align middle
+          .shopProfileInfoState
+            margin-top 20px
+            .smallLabel
+              padding-right 30px
+      .shopProfileYesterday
+        background-color #f8f8f8
+        height 100px
+        margin-top 50px
+        .el-row
+          padding 26px 40px 0 40px
+      .filterDate
+        background-color #f8f8f8
+        margin-top 50px
+        padding 20px
+        .filterDateButton
+          padding-left 70px
+          margin-top 20px
+      .charts
+        width 100%
+        margin-top 20px
+</style>
+

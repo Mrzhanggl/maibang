@@ -1,0 +1,16 @@
+export default {
+  state: {
+    change: false,
+    show_who: 1,
+  },
+  mutations: {
+    switch_change(state) {
+      state.change = state.change ? false : true;
+    },
+    change_who(state, {
+      num
+    }) {
+      state.show_who = num;
+    }
+  }
+};

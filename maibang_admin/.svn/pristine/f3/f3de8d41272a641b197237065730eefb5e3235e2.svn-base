@@ -1,0 +1,43 @@
+const state = {
+    url: null,
+    show: false
+}
+const getters = {
+
+}
+
+const actions = {
+    changeUrl({ commit }, data) {
+        commit('changeUrl', data)
+    },
+    showShare({ commit }){
+        commit('showShare')
+    },
+    hideShare( { commit }){
+        commit('hideShare')
+    }
+   
+}
+
+const mutations = {
+    changeUrl(state,data) {
+        state.url = data.url
+        console.log(data,"xhsakdh")
+        sessionStorage.setItem("share_url",data.url)
+        sessionStorage.setItem("share_title",data.title)
+        sessionStorage.setItem("share_img",data.img)
+    },
+    showShare(state){
+        state.show = true
+    },
+    hideShare(state){
+        state.show = false
+    }
+}
+
+export default {
+    state,
+    getters,
+    actions,
+    mutations
+}

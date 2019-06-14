@@ -1,0 +1,31 @@
+import request from "@/utils/request"
+
+//个人中心信息
+export const userMessage = () => {
+
+  return request({
+    url: '/pc_seller/user/usermessage',
+    method: 'post',
+    data: {}
+  })
+}
+
+//个人名片
+export const usertwodimensioncode = () => {
+
+  return request({
+    url: '/pc_seller/user/usertwodimensioncode',
+    method: 'post',
+    data: {}
+  })
+}
+
+//获取手机号
+export const usermobilenumber = () => {
+
+  return request({
+    url: '/pc_seller/user/usermobilenumber',
+    method: 'get',
+    param: {}
+  })
+}

@@ -1,0 +1,473 @@
+<template>
+    <!-- 店铺装修 -->
+      <el-container id="shopInstallAddInfo2">
+    <!-- header头 -->
+    <el-header class="bgFFF">
+     <el-breadcrumb> 
+        <el-breadcrumb-item :to="{path:'home'}">     
+          模板商城
+        </el-breadcrumb-item>
+        <el-breadcrumb-item>
+          模板详情
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-header>
+    <!-- 主体内容 -->
+    <el-main>
+      <el-row class="mainBody bgFFF">
+        <el-col>
+          <div class="header">
+            <div class="broadcast">
+              <el-carousel 
+                type="card" 
+                :interval= "0"
+                trigger="click"
+                @change="templateOpen"
+                arrow="never"
+                height="156px">
+                <el-carousel-item 
+                v-for="items in broadcasts" 
+                :key="items.id"
+                >
+                  <el-upload class="avatar-uploader"
+                    action="pc_seller/pc_seller/images/ImgUploads"
+                    :show-file-list = "false"
+                    :http-request	= "beforeAvatarUpload"
+                    >
+                    <img v-if="items.url" :src="items.url" class="avatar">
+                      <i v-else class="el-icon-plus avatar-uploader-icon">
+                    </i>
+                  </el-upload> 
+                </el-carousel-item>
+              </el-carousel>
+            </div>
+            <div class="proposalText">
+              <p>1:建议图片宽高为：<span class="colorRed">800*480px</span></p>
+              <p>2:如果图片不是以上尺寸，则只能显示一部分图片内容</p>
+            </div>
+          </div>
+          <div class="main">
+            <el-row type="flex" justify="center">
+              <div class="previewImg">
+                <img :src="imageUrl" alt="">
+              </div>
+              
+            </el-row>
+            <el-row class="adJump" type="flex" justify="space-between">
+                <div class="addJumpText"><span class="font14">广告跳转至: </span></div>
+                <el-button
+                  plain
+                  size="small"
+                  @click="diglogVisibleShow"
+                >
+                  请选择目的地
+                  <i class="el-icon-arrow-right"></i>
+                </el-button>
+              </el-row>
+              <el-row class="buttonUp" type="flex" justify="center">
+                <el-button type="info" size="small" @click ="deleteImage">删除</el-button>
+                 <el-button  type="primary" size="small" @click="submitImage">提交</el-button>
+              </el-row>
+              
+          </div>
+        </el-col>
+        <el-dialog
+               title="选择跳转商品"
+                :visible.sync="diglogVisible"
+                :modal = "false"
+                :modal-append-to-body="false"
+                width="400px"
+              >
+              <el-input
+                size="small"
+                placeholder="搜索你要找的商品"
+                prefix-icon="el-icon-search"
+              ></el-input>
+              <ul class="color-6 productList">
+                <label v-for="item in items"  :key="item.id">
+                <li 
+                  
+                  :style="'backgroundImage:url('+item.skuInfo.sku_img+')'"
+                >
+                  <p>{{item.product_name}}</p>
+                  <p>编码：{{item.product_sku_num}}</p>
+                  <el-radio
+                    v-model="radio"
+                    @change="radioChange"
+                    :label="item.id"
+                  >
+                   </el-radio>
+                </li>
+                </label>
+              </ul>
+              <el-row class="pagingDiv" justify="center" type="flex">
+                <el-pagination
+                  small
+                  layout="prev, pager, next"
+                  :background = "true"
+                  :page-size = "5"
+                  :pager-count = "5"
+                  :total="total"
+                  @current-change = "Paging"
+                  >
+                </el-pagination>
+                </el-row> 
+                
+               <span slot="footer" class="dialog-footer">
+                  <el-button @click="diglogVisible = false" size="small">取 消</el-button>
+                  <el-button type="primary" @click="binding" size="small">确 定</el-button>
+                </span>
+              </el-dialog>
+      </el-row>
+    </el-main>
+  </el-container>
+</template>
+<script>
+import { imgUploads } from "api/shop/authentication";
+import {
+  detail,
+  searchMerchantProduct,
+  saveMerchantAdvertisement
+} from "api/shop/install";
+export default {
+  data() {
+    return {
+      paginationIndex: 0,
+      total: 0,
+      pagingNum: "",
+      radio: "1",
+      diglogVisible: false,
+      imageUrl: "",
+      chooseID: 0,
+      advertisementList: [],
+      broadcasts: [
+        {
+          url: "",
+          productId: "",
+          picture_relative: ""
+        },
+        {
+          url: "",
+          productId: "",
+          picture_relative: ""
+        },
+        {
+          url: "",
+          productId: "",
+          picture_relative: ""
+        },
+        {
+          url: "",
+          productId: "",
+          picture_relative: ""
+        }
+      ],
+      productData: [], //商品总列表
+      items: [] //当前页商品列表
+    };
+  },
+  mounted() {
+    this.Initialization();
+  },
+  computed: {
+    ifAdSave() {
+      return this.$store.state.shopinstall.if_ad_save;
+    }
+  },
+  watch: {
+    ifAdSave: function() {
+      this.Initialization();
+    }
+  },
+
+  methods: {
+    Initialization() {
+      // 进行商品分类
+      searchMerchantProduct().then(result => {
+        this.productData = result.data.data.productData;
+        this.total = this.productData.length;
+        this.items = this.productData.slice(
+          this.paginationIndex * 5,
+          this.paginationIndex * 5 + 5
+        );
+      });
+      // 获取模板信息
+      detail(2).then(res => {
+        if (res.data.code == 200) {
+          let base = res.data.data.template;
+          base.forEach((value, index) => {
+            this.broadcasts[index].url = value.picture;
+            this.broadcasts[index].picture_relative = value.picture_relative;
+            this.broadcasts[index].productId = value.product_id;
+          });
+          this.imageUrl = base[0].picture;
+        } else {
+          this.$message.error(res.data.error);
+        }
+      });
+      console.log(this.broadcasts);
+    },
+
+    //
+    selectRadio(index) {
+      this.radio = index;
+    },
+    // 绑定翻页与商品变化
+    productPagin() {
+      this.items = this.productData.slice(
+        this.paginationIndex * 5,
+        this.paginationIndex * 5 + 5
+      );
+    },
+    // 提交广告图
+    submitImage() {
+      this.broadcasts.forEach((value, index) => {
+        if (value.url) {
+          let _value = {
+            productId: value.productId,
+            picture_relative: value.picture_relative
+          };
+          this.advertisementList.push(_value);
+        }
+      });
+      saveMerchantAdvertisement(2, this.advertisementList).then(result => {
+        this.$message.success("添加成功");
+
+        this.$store.commit("switch_change");
+
+        this.$router.push({ path: "switch2" });
+
+        this.advertisementList = [];
+        this.broadcasts = [
+          {
+            url: "",
+            productId: "",
+            picture_relative: ""
+          },
+          {
+            url: "",
+            productId: "",
+            picture_relative: ""
+          },
+          {
+            url: "",
+            productId: "",
+            picture_relative: ""
+          },
+          {
+            url: "",
+            productId: "",
+            picture_relative: ""
+          }
+        ];
+        this.chooseID = 0;
+        this.imageUrl = "";
+      });
+    },
+    //删除对应的轮播图片
+    deleteImage() {
+      this.broadcasts[this.chooseID].url = "";
+      this.broadcasts[this.chooseID].productId = "";
+      this.broadcasts[this.chooseID].picture_relative = "";
+      this.imageUrl = "";
+    },
+
+    // 轮播图改变的时候
+    templateOpen(id) {
+      this.chooseID = id;
+      this.imageUrl = this.broadcasts[id].url;
+      this.radio = this.broadcasts[id].productId;
+    },
+    // 上传之前
+    beforeAvatarUpload(file) {
+      const isJPG =
+        file.file.type === "image/jpg" ||
+        file.file.type === "image/png" ||
+        file.file.type === "image/jpeg" ||
+        file.type === "image/gif";
+      if (!isJPG) {
+        this.$message.error("上传头像图片只能是 JPG、png、jpeg、gif 格式!");
+      } else {
+        let reader = new FileReader();
+        reader.readAsDataURL(file.file);
+        reader.onload = () => {
+          this.imageUrl = reader.result;
+          imgUploads(1, this.imageUrl).then(result => {
+            this.broadcasts[this.chooseID].url = this.imageUrl;
+            this.broadcasts[this.chooseID].picture_relative =
+              result.data.data.originImg;
+          });
+        };
+      }
+
+      return isJPG;
+    },
+    // 选择商品列表栏展开
+    diglogVisibleShow() {
+      if (!this.imageUrl) {
+        this.$message.error("请上传图片");
+      } else {
+        this.diglogVisible = true;
+      }
+    },
+
+    // 绑定图片与商品
+    binding() {
+      if (this.radio) {
+        this.broadcasts[this.chooseID].productId = this.radio;
+        console.log(this.broadcasts);
+        console.log(this.radio);
+      }
+      this.diglogVisible = false;
+    },
+    // 商品的单选框按钮改变的时候
+    radioChange() {},
+
+    // 翻页的时候
+    Paging(value) {
+      this.paginationIndex = value - 1;
+      this.productPagin();
+    }
+  }
+};
+</script>
+
+<style lang="stylus" scoped>
+#shopInstallAddInfo2
+  .el-header
+    margin-left 1px
+    .el-breadcrumb
+      line-height 60px
+  .el-main
+    padding 10px
+    .mainBody
+      width 100%
+      padding 20px 20px 80px 20px
+      position relative
+      >.el-col
+        width 560px
+        .header
+          padding 20px
+          background-color #f8f8f8
+          .broadcast
+            width 100%
+            margin-bottom 20px
+            .el-carousel
+              padding-top 4px
+            ul
+              li
+                width 20px
+                height 20px
+            .avatar-uploader
+              width 100%
+          .proposalText
+            p
+              margin-bottom 10px
+        .main
+          background-color #f2f2f2
+          padding 30px 20px
+          position relative
+          .previewImg
+            width 260px
+            height 156px
+            box-shadow 0 0 4px #cccccc
+            background-color #ffffff
+            overflow hidden
+            img
+              width 100%
+              height auto
+          .adJump
+            margin-top 30px
+            .addJumpText
+              width 90px
+              line-height 32px
+              margin-right 10px
+            .el-button
+              width 100%
+          .buttonUp
+            margin-top 30px
+      .el-dialog
+        .productList
+          li
+            border-bottom 1px solid #cccccc
+            padding 10px 20px 10px 70px
+            background-repeat no-repeat
+            background-size 40px 40px
+            background-position center left
+            position relative
+            p:first-of-type
+              margin-bottom 6px
+            .el-radio
+              position absolute
+              right 0
+              top 24px
+        .pagingDiv
+          position relative
+          margin-top 20px
+          .pagingSpan
+            display inline-block
+            position absolute
+            top 0
+            right 0px
+            line-height 22px
+            font-size 12px
+</style>
+<style>
+#shopInstallAddInfo2 .broadcast li {
+  width: 20px;
+  height: 8px;
+}
+#shopInstallAddInfo2 .broadcast li button {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 1;
+}
+#shopInstallAddInfo2 .broadcast .el-carousel__indicator.is-active button {
+  background-color: #1491f2;
+}
+#shopInstallAddInfo2 .el-carousel__item {
+  line-height: 156px;
+  background-color: #ffffff;
+  box-shadow: 0 0 4px #cccccc;
+}
+#shopInstallAddInfo2 .el-button {
+  text-align: left;
+}
+#shopInstallAddInfo2 .el-button .el-icon-arrow-right {
+  position: absolute;
+  right: 10px;
+}
+
+#shopInstallAddInfo2 .el-dialog__wrapper .el-dialog {
+  background-color: #f2f2f2;
+}
+#shopInstallAddInfo2 .el-dialog .productList .el-radio .el-radio__label {
+  display: none;
+}
+#shopInstallAddInfo2 .mainBody > .el-dialog__wrapper {
+  position: absolute;
+}
+#shopInstallAddInfo2 .mainBody > .el-dialog__wrapper .el-dialog {
+  position: absolute;
+  bottom: 30px;
+  left: 600px;
+}
+#shopInstallAddInfo2 .el-upload {
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+}
+#shopInstallAddInfo2 .el-upload .avatar-uploader-icon {
+  font-size: 50px;
+  color: #1491f2;
+  width: 260px;
+  height: 156px;
+  line-height: 156px;
+  text-align: center;
+}
+#shopInstallAddInfo2 .el-upload img {
+  width: 100%;
+  height: auto;
+}
+</style>

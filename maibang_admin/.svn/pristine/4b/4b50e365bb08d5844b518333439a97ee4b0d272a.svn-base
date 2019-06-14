@@ -1,0 +1,40 @@
+const state = {
+    url: null,
+    show: false
+}
+const getters = {
+
+}
+
+const actions = {
+    changeUrl({ commit }, data) {
+        commit('changeUrl', data)
+    },
+    showShare({ commit }){
+        commit('showShare')
+    },
+    hideShare( { commit }){
+        commit('hideShare')
+    }
+   
+}
+
+const mutations = {
+    changeUrl(state,data) {
+        state.url = data
+        localStorage.setItem("url",state.url)
+    },
+    showShare(state){
+        state.show = true
+    },
+    hideShare(state){
+        state.show = false
+    }
+}
+
+export default {
+    state,
+    getters,
+    actions,
+    mutations
+}

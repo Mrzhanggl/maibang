@@ -1,0 +1,89 @@
+const state = {
+    show: false,
+    userArr: [],
+    activeUser: null,
+    isSmall: false,
+    isShowChat: false,
+    share: 'www.bai.com'
+}
+const getters = {
+
+}
+
+const actions = {
+    show({ commit }, data) {
+        commit('show', data)
+    },
+    close({ commit }) {
+        commit('close')
+    },
+    closeThis({ commit }, data) {
+        commit('closeThis', data)
+    },
+    select({ commit }, data) {
+        commit('select', data)
+    },
+    small({ commit }) {
+        commit('small')
+    },
+    closeWebChat({ commit }) {
+        commit('closeWebChat')
+    },
+    openWebChat({ commit }) {
+        commit('openWebChat')
+    }
+}
+
+const mutations = {
+    small(state) {
+        state.show = false
+        state.isSmall = true
+    },
+    show(state, data) {
+        state.show = true
+        state.isSmall = false
+        for (let i = 0; i < state.userArr.length; i++) {
+            if (state.userArr[i].receiverName == data.receiverName) {
+                state.userArr.splice(i, 1)
+            }
+        }
+        state.userArr.push(data)
+        state.activeUser = data
+    },
+    close(state) {
+        state.show = false
+        state.userArr = []
+    },
+    closeThis(state, data) {
+        console.log(state.activeUser, "这是当前的数组")
+        for (let i = 0; i < state.userArr.length; i++) {
+            if (state.userArr[i].receiverName == data.receiverName) {
+                if (state.activeUser.receiverName == data.receiverName) { //替换当前窗口
+                    if (state.userArr[i - 1]) {
+                        state.activeUser = state.userArr[i - 1]
+                    } else {
+                        state.activeUser = state.userArr[i + 1]
+                    }
+                }
+                state.userArr.splice(i, 1)
+
+            }
+        }
+    },
+    select(state, data) {
+        state.activeUser = data
+    },
+    closeWebChat(state) {
+        state.isShowChat = false
+    },
+    openWebChat(state) {
+        state.isShowChat = true
+    }
+}
+
+export default {
+    state,
+    getters,
+    actions,
+    mutations
+}

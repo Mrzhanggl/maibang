@@ -1,0 +1,299 @@
+<template>    
+    <div id="notBeginning">
+        <el-button type="prinary" size="mini" class="addgoods" @click="addCommodity">添加商品</el-button> 
+        <el-table
+    ref="multipleTable"
+    :data="tableData3"
+    tooltip-effect="dark"
+    style="width: 100%"
+    @selection-change="handleSelectionChange">
+    <el-table-column
+      type="selection"
+      width="55">
+    </el-table-column>
+    <el-table-column
+      label="商品"
+      width="360">
+      <template slot-scope="scope">
+          <div class="goods-exhibition">
+            <div class="goods-pic">                
+            </div>
+            <div class="goods-data">
+                <p>铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞铜芯火花塞火花塞</p>
+                <p>编码：123456789</p>
+                <p><span class="color-red">折后价￥22.00</span><span>&yen; 50.00</span></p>                                      
+                <!-- <el-button type="primary" size="mini">还有更多商品</el-button > -->
+            </div>
+          </div>
+      </template>
+    </el-table-column>
+    <el-table-column
+      prop="attribute"
+      label="属性"
+      width="280">
+    </el-table-column>
+    <el-table-column
+      prop="time"
+      label="开始时间"
+      show-overflow-tooltip
+      width="200">
+    </el-table-column>
+    <el-table-column      
+      label="操作"
+      show-overflow-tooltip>
+        <template slot-scope="scope">
+            <a href="javasrcipt: ;" @click="goUrl">{{ scope.row.operation }}</a>
+        </template>
+    </el-table-column>
+  </el-table>
+  <!-- <div style="margin-top: 20px">
+    <el-button @click="toggleSelection([tableData3[1], tableData3[2]])">切换第二、第三行的选中状态</el-button>
+    <el-button @click="toggleSelection()">取消选择</el-button>
+  </div> -->             
+    <el-button type="prinary" size="mini" class="recovery">恢复原价</el-button>
+  <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page.sync="currentPage1"
+      :page-size="20"
+      layout="total, prev, pager, next"
+      :total="100">
+    </el-pagination>
+    <!--添加商品-->
+        <div class="add-model" v-if="isNotOpen" @click="colse(1)">
+            <div class="add-content" @click.stop="colse(2)">
+                <div class="top-cont">
+                    <p>选择商品</p>
+                    <img src="../../../../images/orderImg/close-icon.png" width="12px" @click="colse(3)">
+                </div>
+                <div class="choice">
+                    <el-input
+                        placeholder="请输入内容"
+                        v-model="input10"
+                        clearable
+                        size="mini"
+                        class="search">
+                    </el-input>
+                </div>
+                <div class="show-goods">
+                    <div class="goods-img">
+                        
+                    </div>
+                    <div class="goods-data">
+                      <p style="font-size: 14px;color: #333">富民覅偶你晚上</p>
+                      <p style="font-size: 12px;color: #666">编码：42221111</p>
+                      <p><span style="color:#ff0000;padding-right:10px;font-size: 12px">折后价￥22.00</span><del style="font-size: 12px;color: #666">&yen;50.00</del></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</template>
+
+<script>
+import {discountgoods} from '@/api/set/setmanage'
+  export default {
+    data() {
+      return {
+        tableData3: [{
+          date: '2016-05-03',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }, {
+          date: '2016-05-02',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }, {
+          date: '2016-05-04',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }, {
+          date: '2016-05-01',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }, {
+          date: '2016-05-08',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }, {
+          date: '2016-05-06',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }, {
+          date: '2016-05-07',
+          attribute: '一盒4个',
+          time: '1天09:33:10后开始',
+          operation: '编辑',
+        }],
+        multipleSelection: [],
+        currentPage1: 1,    
+        //模態框
+        isNotOpen: false,
+        // 搜索內容
+        input10: '',
+      }
+    },
+
+    methods: {
+      //关闭添加商品
+      colse(num){
+        if(num==1||num==3){
+            this.isNotOpen = false;
+           $('html,body').css('overflow','hidden');
+        }        
+        else{
+            return;
+        }   
+    },
+      //打開添加商品窗口
+      addCommodity(){
+        this.isNotOpen = true;
+      },
+      //创建时
+      getData(){
+          let data = {
+            type: 2,//未开始
+            page: 1,
+          }
+          discountgoods(data).then(res =>{
+            console.log(res,'哈哈')
+          })
+      },
+      toggleSelection(rows) {
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      handleSizeChange(val) {
+        console.log(`每页 ${val} 条`);
+      },
+      handleCurrentChange(val) {
+        console.log(`当前页: ${val}`);
+      },
+      goUrl(){
+          alert(123)
+          //转跳编辑商品
+          this.$router.push({path: 'setdiscountgoods'})
+      }
+    },
+    created(){
+      this.getData();
+    }
+  }
+</script>
+<style scoped>
+#notBeginning >>> a{
+    color: #1491f2;
+}
+#notBeginning >>> .el-pagination{
+    text-align: center;    
+}
+.goods-exhibition{           
+    display: flex;
+    justify-content: space-between;   
+    padding-right: 60px;    
+    display: flex;
+    justify-content: space-between;    
+    align-items: center;
+}
+.goods-pic{
+    background-color: #333;
+    width: 60px;
+    height: 60px;             
+    position: relative;    
+}
+.goods-data{        
+    width: 200px;                        
+    font-size: 14px;           
+}
+.goods-data .price{
+    display: inline-block;
+    color: #333; 
+    margin-top: 3px;    
+}
+.goods-data p:first-child{
+    font-size: 14px;
+    overflow: hidden;/*内容超出后隐藏*/
+    text-overflow: ellipsis;/* 超出内容显示为省略号*/
+    white-space: nowrap;/*文本不进行换行*/
+    color: #333;
+}
+.goods-data p{    
+    color: #666;    
+}
+.color-red{
+    color: #ff0000;
+    padding-right: 15px;
+}
+.addgoods{
+    float:right;
+}
+.recovery{
+    position: relative;
+    top: 10px;
+}
+/* 添加商品窗口 */
+.add-model{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    background-color: rgba(127,127,127,0.6);
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+.add-content{
+    width: 400px;
+    height: 500px;
+    background-color: #FFF;    
+}
+.top-cont{
+  text-align: center;
+  position: relative;
+  height: 50px;
+  line-height: 50px;
+}
+.top-cont img{
+  position: absolute;
+  top: 18px;
+  right: 10px;
+  cursor: pointer;
+}
+.choice{
+  text-align: center;
+}
+.search{
+  width: 380px;
+}
+.show-goods{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 70px;
+  border-bottom: 1px solid #CCC
+}
+.goods-img{
+  background-color: red;
+  width: 50px;
+  height: 50px;  
+  margin-right: 10px;  
+}
+</style>

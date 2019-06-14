@@ -1,0 +1,22 @@
+import request from '@/utils/request'
+
+export function getChatList(params) {
+    params = {
+        ...params
+    }
+    return request({
+        url: "pc_seller/chat/messageList",
+        method: "get",
+        params
+    })
+}
+
+export function getchatRecord(data) {
+    return request({
+        url: "http://192.168.1.254:8989/seller/chat/chatRecord",
+        method: 'post',
+        data: {
+            ...data
+        }
+    })
+}
